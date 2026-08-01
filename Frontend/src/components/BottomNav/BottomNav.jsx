@@ -28,7 +28,7 @@ function BottomNav() {
             </button>
           );
         }
-        const path = item.id === "me" ? `/profile/${user?.id}` : item.path;
+        const path = item.id === "me" ? `/profile/${user?.id}` : item.id === "uni-vibe" ? "/rankings" : item.path;
         return (
           <NavLink key={item.id} to={path} end={path === "/"} className={({ isActive }) => `bottom-nav__item ${isActive ? "active" : ""}`}>
             <Icon size={22} />

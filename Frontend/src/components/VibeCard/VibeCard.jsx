@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./VibeCard.css";
 import {
   Heart,
@@ -39,8 +39,10 @@ function VibeCard({ vibe }) {
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuClosing, setMenuClosing] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentCount, setCommentCount] = useState(comments);
+  const menuRef = useRef(null);
 
   const demoComments = useMemo(
     () => [
@@ -55,6 +57,48 @@ function VibeCard({ vibe }) {
     setCommentCount((prev) => prev + 1);
     setCommentText("");
   };
+
+  const closeMenu = () => {
+    if (!menuOpen && !menuClosing) return;
+    setMenuClosing(true);
+    window.setTimeout(() => {
+      setMenuOpen(false);
+      setMenuClosing(false);
+    }, 180);
+  };
+
+  const toggleMenu = () => {
+    if (menuOpen) {
+      closeMenu();
+    } else {
+      setMenuClosing(false);
+      setMenuOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        closeMenu();
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen, menuClosing]);
 
   return (
     <article className="vibe-card">
@@ -77,23 +121,30 @@ function VibeCard({ vibe }) {
           <Bookmark size={26} fill={saved ? "#2d8cff" : "none"} color={saved ? "#2d8cff" : "white"} />
           <span>{formatCount(saves)}</span>
         </button>
-        <button type="button" className="vibe-card__action vibe-card__action--more" onClick={() => setMenuOpen((prev) => !prev)}>
+        <button type="button" className="vibe-card__action vibe-card__action--more" onClick={toggleMenu}>
           <MoreHorizontal size={26} />
         </button>
       </div>
 
-      {menuOpen && (
-        <div className="vibe-card__menu">
-          <button type="button"><Zap size={16} /> Interested</button>
-          <button type="button"><EyeOff size={16} /> Not Interested</button>
-          <button type="button"><Flag size={16} /> Hide Post</button>
-          <button type="button"><Ban size={16} /> Report</button>
-          <button type="button"><Volume2 size={16} /> Mute User</button>
-          <button type="button"><FolderPlus size={16} /> Save to Collection</button>
-          <button type="button"><Clock3 size={16} /> Playback Speed</button>
-          <button type="button"><Copy size={16} /> Copy Link</button>
-          <button type="button"><MessageSquare size={16} /> View Profile</button>
-          <button type="button" onClick={() => setMenuOpen(false)}>Cancel</button>
+      {(menuOpen || menuClosing) && (
+        <div ref={menuRef} className={`vibe-card__menu ${menuClosing ? "closing" : "open"}`}>
+          <button type="button" onClick={closeMenu}><Zap size={16} /> Interested</button>
+          <button type="button" onClick={closeMenu}><EyeOff size={16} /> Not Interested</button>
+          <button type="button" onClick={closeMenu}><Flag size={16} /> Hide Post</button>
+          <button type="button" onClick={closeMenu}><FolderPlus size={16} /> Save to Collection</button>
+          <button type="button" onClick={closeMenu}><Copy size={16} /> Copy Link</button>
+          <button type="button" onClick={closeMenu}><Ban size={16} /> Report</button>
+          <button type="button" onClick={closeMenu}><Volume2 size={16} /> Block User</button>
+          <button type="button" onClick={closeMenu}><Volume2 size={16} /> Mute User</button>
+          <div className="vibe-card__menu-group">
+            <span>Playback Speed</span>
+            <div className="vibe-card__speed-row">
+              <button type="button" onClick={closeMenu}>0.5×</button>
+              <button type="button" onClick={closeMenu}>1×</button>
+              <button type="button" onClick={closeMenu}>1.5×</button>
+              <button type="button" onClick={closeMenu}>2×</button>
+            </div>
+          </div>
         </div>
       )}
 
