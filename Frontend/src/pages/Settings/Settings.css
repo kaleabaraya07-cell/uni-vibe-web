@@ -1,0 +1,7 @@
+.settings-page h1 { font-size: 22px; margin-bottom: 24px; }
+.settings-section { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.settings-section h2 { font-size: 14px; color: #bcbcbc; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.settings-lang { display: flex; gap: 8px; }
+.settings-lang button { padding: 10px 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #bcbcbc; cursor: pointer; }
+.settings-lang button.active { background: rgba(45,140,255,0.2); border-color: #2d8cff; color: #fff; }
+.settings-toggle { display: flex; align-items: center; gap: 10px; font-size: 14px; margin-bottom: 10px; cursor: pointer; }

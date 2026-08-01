@@ -1,0 +1,166 @@
+.right-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.right-section {
+  padding: 20px;
+}
+
+.right-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.right-section__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.right-section__header h3,
+.right-section__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.right-section__link {
+  background: none;
+  border: none;
+  color: #2d8cff;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.university-students {
+  display: flex;
+  gap: 10px;
+}
+
+.university-students__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.contributors-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contributors-list__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contributors-list__rank {
+  width: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d8cff;
+  text-align: center;
+}
+
+.contributors-list__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.contributors-list__name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.contributors-list__points {
+  font-size: 13px;
+  color: #bcbcbc;
+  font-weight: 600;
+}
+
+.event-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.event-card__date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+  padding: 8px;
+  background: rgba(45, 140, 255, 0.15);
+  border-radius: 12px;
+  border: 1px solid rgba(45, 140, 255, 0.25);
+}
+
+.event-card__month {
+  font-size: 10px;
+  font-weight: 700;
+  color: #2d8cff;
+  letter-spacing: 0.5px;
+}
+
+.event-card__day {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.event-card__image {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.event-card__info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.event-card__info p {
+  font-size: 12px;
+  color: #bcbcbc;
+}
+
+.event-card__time {
+  color: #2d8cff !important;
+  margin-top: 2px;
+}
+
+.view-all-events {
+  width: 100%;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(45, 140, 255, 0.4);
+  border-radius: 16px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.view-all-events:hover {
+  background: rgba(45, 140, 255, 0.1);
+  box-shadow: 0 0 20px rgba(45, 140, 255, 0.15);
+}

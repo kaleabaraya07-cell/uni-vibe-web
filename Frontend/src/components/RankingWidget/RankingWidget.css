@@ -1,0 +1,47 @@
+.ranking-widget {
+  padding: 20px;
+}
+
+.ranking-widget__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.ranking-widget__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ranking-widget__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ranking-widget__rank {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d8cff;
+  width: 20px;
+}
+
+.ranking-widget__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.ranking-widget__name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.ranking-widget__points {
+  font-size: 13px;
+  color: #bcbcbc;
+  font-weight: 600;
+}

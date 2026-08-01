@@ -1,0 +1,81 @@
+export const mockCredentials = {
+  email: "demo@univibe.com",
+  password: "demo123",
+};
+
+export const currentUser = {
+  id: "u1",
+  name: "Kalab Araya",
+  username: "@kalab",
+  email: "demo@univibe.com",
+  avatar: "https://i.pravatar.cc/150?u=kalab",
+  university: "EPSU",
+  universityId: "uni1",
+  department: "Software Engineering",
+  departmentId: "dept1",
+  year: "3rd Year",
+  bio: "Campus storyteller. Basketball fan. UV it!",
+  verified: true,
+  followers: 1240,
+  following: 380,
+  vibeCount: 42,
+};
+
+export const mockUsers = [
+  currentUser,
+  {
+    id: "u2",
+    name: "Mesay T.",
+    username: "@mesay",
+    email: "mesay@univibe.com",
+    avatar: "https://i.pravatar.cc/150?u=mesay",
+    university: "EPSU",
+    universityId: "uni1",
+    department: "Computer Science",
+    departmentId: "dept2",
+    year: "4th Year",
+    bio: "Hackathon enthusiast",
+    verified: true,
+    followers: 890,
+    following: 210,
+    vibeCount: 28,
+  },
+  {
+    id: "u3",
+    name: "Hana M.",
+    username: "@hana",
+    email: "hana@univibe.com",
+    avatar: "https://i.pravatar.cc/150?u=hana",
+    university: "EPSU",
+    universityId: "uni1",
+    department: "Electrical Engineering",
+    departmentId: "dept3",
+    year: "2nd Year",
+    bio: "Cultural events organizer",
+    verified: false,
+    followers: 560,
+    following: 145,
+    vibeCount: 19,
+  },
+  {
+    id: "u4",
+    name: "Abel G.",
+    username: "@abel",
+    email: "abel@univibe.com",
+    avatar: "https://i.pravatar.cc/150?u=abel",
+    university: "AAU",
+    universityId: "uni2",
+    department: "Mechanical Engineering",
+    departmentId: "dept4",
+    year: "3rd Year",
+    bio: "Sports vibes only",
+    verified: true,
+    followers: 720,
+    following: 190,
+    vibeCount: 35,
+  },
+];
+
+export function getUserById(id) {
+  return mockUsers.find((u) => u.id === id);
+}

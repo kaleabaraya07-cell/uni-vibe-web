@@ -1,0 +1,28 @@
+.ui-tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+}
+
+.ui-tab-bar__tab {
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  color: #bcbcbc;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.2s;
+}
+
+.ui-tab-bar__tab.active {
+  color: #fff;
+  border-bottom-color: #2d8cff;
+}
+
+.ui-tab-bar__tab:hover {
+  color: #fff;
+}

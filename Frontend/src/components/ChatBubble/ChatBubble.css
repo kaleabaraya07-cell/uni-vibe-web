@@ -1,0 +1,4 @@
+.chat-bubble { max-width: 75%; padding: 10px 14px; background: rgba(255,255,255,0.08); border-radius: 16px 16px 16px 4px; align-self: flex-start; }
+.chat-bubble--own { background: rgba(45,140,255,0.25); border-radius: 16px 16px 4px 16px; align-self: flex-end; }
+.chat-bubble p { font-size: 14px; margin-bottom: 4px; }
+.chat-bubble span { font-size: 11px; color: #bcbcbc; }

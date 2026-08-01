@@ -1,0 +1,51 @@
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.ui-button:hover {
+  opacity: 0.9;
+}
+
+.ui-button:active {
+  transform: scale(0.98);
+}
+
+.ui-button--primary {
+  background: linear-gradient(135deg, #2d8cff, #0066ff);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(45, 140, 255, 0.35);
+}
+
+.ui-button--secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ui-button--ghost {
+  background: transparent;
+  color: #bcbcbc;
+  padding: 8px 12px;
+}
+
+.ui-button--social {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+.ui-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -1,0 +1,6 @@
+.rankings-page h1 { font-size: 22px; margin-bottom: 20px; }
+.rankings-page section { margin-bottom: 24px; }
+.rankings-page h2 { font-size: 16px; margin-bottom: 12px; color: #bcbcbc; }
+.rankings-list { list-style: none; }
+.rankings-list li { padding: 12px; background: rgba(255,255,255,0.06); border-radius: 12px; margin-bottom: 8px; font-size: 14px; }
+.rankings-list span { color: #2d8cff; font-weight: 700; margin-right: 8px; }

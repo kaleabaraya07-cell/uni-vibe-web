@@ -1,0 +1,129 @@
+.see-through {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  pointer-events: none;
+}
+
+.see-through__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.see-through__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400px;
+  max-width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 24px;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.see-through--mobile .see-through__panel {
+  top: auto;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  height: 75vh;
+  border-left: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px 24px 0 0;
+}
+
+.see-through__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bcbcbc;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.st-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.st-panel__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.st-panel__caption {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.st-panel__meta {
+  font-size: 13px;
+  color: #bcbcbc;
+  margin-bottom: 8px;
+}
+
+.st-panel__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.st-panel__tag {
+  padding: 4px 10px;
+  background: rgba(45, 140, 255, 0.15);
+  border-radius: 12px;
+  font-size: 12px;
+  color: #2d8cff;
+}
+
+.st-panel__link {
+  display: inline-block;
+  color: #2d8cff;
+  font-size: 13px;
+  text-decoration: none;
+  margin-top: 8px;
+}
+
+.st-panel__link:hover {
+  text-decoration: underline;
+}
+
+.st-panel__stats {
+  display: flex;
+  gap: 16px;
+  margin: 16px 0;
+  font-size: 13px;
+  color: #bcbcbc;
+}
+
+.st-panel__section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.st-panel__section h4 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}

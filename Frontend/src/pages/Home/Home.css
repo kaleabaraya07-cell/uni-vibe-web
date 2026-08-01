@@ -1,0 +1,11 @@
+.home {
+  display: flex;
+  justify-content: center;
+  min-height: 620px;
+}
+
+@media (max-width: 768px) {
+  .home {
+    min-height: 520px;
+  }
+}

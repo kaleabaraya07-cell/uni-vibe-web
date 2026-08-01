@@ -1,0 +1,8 @@
+.vibe-card__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: inherit;
+}

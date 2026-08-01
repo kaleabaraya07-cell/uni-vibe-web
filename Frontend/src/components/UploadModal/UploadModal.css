@@ -1,0 +1,35 @@
+.upload-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.upload-modal__preview {
+  height: 160px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bcbcbc;
+  font-size: 14px;
+}
+
+.upload-modal__label {
+  font-size: 13px;
+  color: #bcbcbc;
+}
+
+.upload-modal__select {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 15px;
+}
+
+.upload-modal__publish {
+  width: 100%;
+}

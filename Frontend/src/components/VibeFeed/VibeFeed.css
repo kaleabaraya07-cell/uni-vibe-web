@@ -1,0 +1,11 @@
+.vibe-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.vibe-feed__sentinel {
+  height: 20px;
+}

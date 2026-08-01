@@ -1,0 +1,3 @@
+.profile-page { max-width: 600px; }
+.profile-vibes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 20px; }
+.profile-vibes__thumb { aspect-ratio: 1; object-fit: cover; border-radius: 8px; width: 100%; }

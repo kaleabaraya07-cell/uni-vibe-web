@@ -1,0 +1,9 @@
+.opportunities-page h1 { font-size: 22px; margin-bottom: 20px; }
+.opportunities-list { display: flex; flex-direction: column; gap: 16px; }
+.opportunity-card { padding: 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
+.opportunity-card__type { font-size: 11px; text-transform: uppercase; color: #2d8cff; font-weight: 600; }
+.opportunity-card h3 { font-size: 18px; margin: 8px 0; }
+.opportunity-card__company { color: #bcbcbc; font-size: 14px; margin-bottom: 8px; }
+.opportunity-card p { font-size: 14px; line-height: 1.5; }
+.opportunity-card__deadline { color: #bcbcbc; font-size: 13px; margin-top: 8px; }
+.opportunity-card__actions { display: flex; gap: 8px; margin-top: 16px; }
