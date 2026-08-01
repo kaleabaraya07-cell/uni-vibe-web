@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import GlassPanel from "../GlassPanel/GlassPanel";
 import { Trophy, Megaphone, Plus, MessageCircle, User } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../context/LocaleContext";
 import { useUpload } from "../../context/UploadContext";
 import { bottomNavItems } from "../../data/mockData";

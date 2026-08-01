@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { getUserById } from "../../data/mockUsers";
 import { mockVibes } from "../../data/mockVibes";
 import ProfileHeader from "../../components/ProfileHeader/ProfileHeader";
+import { Award, Bookmark, Camera, PlayCircle, Settings, Sparkles } from "lucide-react";
 import "./Profile.css";
 
 function Profile() {
@@ -15,10 +16,29 @@ function Profile() {
 
   return (
     <div className="profile-page">
+      <div className="profile-page__cover" />
       <ProfileHeader user={user} following={following} onFollow={() => setFollowing(!following)} />
+
+      <div className="profile-page__stats-grid">
+        <div className="profile-page__card"><Award size={18} /><span>Achievements</span><strong>12</strong></div>
+        <div className="profile-page__card"><Bookmark size={18} /><span>Saved</span><strong>8</strong></div>
+        <div className="profile-page__card"><Camera size={18} /><span>Photos</span><strong>17</strong></div>
+        <div className="profile-page__card"><PlayCircle size={18} /><span>Videos</span><strong>5</strong></div>
+      </div>
+
+      <div className="profile-page__toolbar">
+        <span className="profile-page__toolbar-pill">Stories</span>
+        <span className="profile-page__toolbar-pill">Events</span>
+        <span className="profile-page__toolbar-pill">Clubs</span>
+        <span className="profile-page__toolbar-pill"><Settings size={14} /> Settings</span>
+      </div>
+
       <div className="profile-vibes">
         {vibes.map((v) => (
-          <img key={v.id} src={v.media} alt="" className="profile-vibes__thumb" />
+          <div key={v.id} className="profile-vibes__thumb-wrap">
+            <img src={v.media} alt="" className="profile-vibes__thumb" />
+            <span className="profile-vibes__label"><Sparkles size={12} /> {v.category}</span>
+          </div>
         ))}
       </div>
     </div>

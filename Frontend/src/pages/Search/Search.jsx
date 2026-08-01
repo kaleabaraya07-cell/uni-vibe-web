@@ -35,6 +35,12 @@ function Search() {
     <div className="search-page">
       <h1>{t("common.search")}</h1>
       <SearchBar value={query} onChange={setQuery} placeholder={t("search.placeholder")} />
+      <div className="search-page__highlights">
+        <span>Trending</span>
+        <span>#CampusLife</span>
+        <span>#Hackathon</span>
+        <span>#Basketball</span>
+      </div>
       <TabBar tabs={tabs} activeId={tab} onChange={setTab} />
       <div className="search-results">
         {tab === "vibes" && results.vibes.map((v) => (
@@ -52,7 +58,7 @@ function Search() {
         {tab === "events" && results.events.map((e) => (
           <Link key={e.id} to={`/event/${e.id}`} className="search-result">{e.title}</Link>
         ))}
-        {results[tab].length === 0 && <p className="search-empty">No results</p>}
+        {results[tab].length === 0 && <p className="search-empty">No results yet — try another keyword.</p>}
       </div>
     </div>
   );

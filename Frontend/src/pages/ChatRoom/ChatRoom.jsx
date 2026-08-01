@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useLocale } from "../../context/LocaleContext";
 import { useChat } from "../../context/ChatContext";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { getConversationById } from "../../data/mockChat";
 import ChatBubble from "../../components/ChatBubble/ChatBubble";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Smile, Paperclip, Mic } from "lucide-react";
 import "./ChatRoom.css";
 
 function ChatRoom() {
@@ -37,7 +37,10 @@ function ChatRoom() {
         ))}
       </div>
       <form className="chat-room__input" onSubmit={handleSend}>
+        <button type="button" className="chat-room__icon"><Smile size={18} /></button>
+        <button type="button" className="chat-room__icon"><Paperclip size={18} /></button>
         <input value={text} onChange={(e) => setText(e.target.value)} placeholder={t("chat.placeholder")} />
+        <button type="button" className="chat-room__icon"><Mic size={18} /></button>
         <button type="submit">{t("common.send")}</button>
       </form>
     </div>

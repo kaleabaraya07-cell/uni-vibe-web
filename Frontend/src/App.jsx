@@ -1,6 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LocaleProvider } from "./context/LocaleContext";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthProvider";
 import { FeedProvider } from "./context/FeedContext";
 import { SeeThroughProvider } from "./context/SeeThroughContext";
 import { NotificationProvider } from "./context/NotificationContext";

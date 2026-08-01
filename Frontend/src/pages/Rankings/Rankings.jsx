@@ -1,6 +1,7 @@
 import { useLocale } from "../../context/LocaleContext";
 import { mockUniversities } from "../../data/mockUniversities";
 import RankingWidget from "../../components/RankingWidget/RankingWidget";
+import { Trophy, Sparkles } from "lucide-react";
 import "./Rankings.css";
 
 function Rankings() {
@@ -9,6 +10,10 @@ function Rankings() {
   return (
     <div className="rankings-page">
       <h1>{t("rankings.title")}</h1>
+      <div className="rankings-page__hero">
+        <div><Trophy size={18} /> Top campus energy</div>
+        <div><Sparkles size={18} /> Fresh weekly leaderboard</div>
+      </div>
       <section>
         <h2>Universities</h2>
         <ul className="rankings-list">

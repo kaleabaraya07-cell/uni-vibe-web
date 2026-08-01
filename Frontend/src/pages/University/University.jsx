@@ -7,6 +7,7 @@ import { mockClubs } from "../../data/mockUniversities";
 import { useLocale } from "../../context/LocaleContext";
 import TabBar from "../../components/ui/TabBar/TabBar";
 import RankingWidget from "../../components/RankingWidget/RankingWidget";
+import { Sparkles, Users, CalendarRange } from "lucide-react";
 import "./Entity.css";
 
 function University() {
@@ -33,6 +34,11 @@ function University() {
       <h1>{uni.name}</h1>
       <p className="entity-page__meta">{uni.location} • {uni.population.toLocaleString()} students • Rank #{uni.ranking}</p>
       <p>{uni.description}</p>
+      <div className="entity-page__badges">
+        <span><Sparkles size={14} /> Trending campus</span>
+        <span><Users size={14} /> {uni.population.toLocaleString()} students</span>
+        <span><CalendarRange size={14} /> {events.length} events</span>
+      </div>
       <TabBar tabs={tabs} activeId={tab} onChange={setTab} />
       {tab === "vibes" && (
         <div className="entity-grid">{vibes.map((v) => <img key={v.id} src={v.media} alt="" />)}</div>

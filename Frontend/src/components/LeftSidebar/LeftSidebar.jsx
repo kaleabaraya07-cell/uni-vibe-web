@@ -3,7 +3,7 @@ import GlassPanel from "../GlassPanel/GlassPanel";
 import {
   Home, Radio, Building2, Users, Megaphone, Trophy, Bookmark, ChevronRight,
 } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../context/LocaleContext";
 import { navItems } from "../../data/mockData";
 import "./LeftSidebar.css";

@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Search, Bell } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../context/LocaleContext";
 import { useNotifications } from "../../context/NotificationContext";
 import "./Navbar.css";

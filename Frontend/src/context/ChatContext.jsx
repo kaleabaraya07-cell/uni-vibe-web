@@ -1,6 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback } from "react";
 import { mockConversations } from "../data/mockChat";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./useAuth";
 
 const ChatContext = createContext(null);
 

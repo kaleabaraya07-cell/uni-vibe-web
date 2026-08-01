@@ -1,6 +1,8 @@
 .entity-page h1 { font-size: 22px; margin: 12px 0 8px; }
-.entity-page__cover { width: 100%; max-height: 200px; object-fit: cover; border-radius: 16px; margin-bottom: 8px; }
+.entity-page__cover { width: 100%; max-height: 220px; object-fit: cover; border-radius: 16px; margin-bottom: 8px; }
 .entity-page__meta { color: #bcbcbc; font-size: 14px; margin-bottom: 12px; }
+.entity-page__badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.entity-page__badges span { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 999px; background: rgba(255,255,255,0.06); color: #fff; font-size: 13px; }
 .entity-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 12px; }
 .entity-grid img { aspect-ratio: 1; object-fit: cover; border-radius: 8px; width: 100%; }
 .entity-list-item { padding: 12px; background: rgba(255,255,255,0.06); border-radius: 12px; margin-bottom: 8px; font-size: 14px; }

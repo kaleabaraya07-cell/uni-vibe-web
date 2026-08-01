@@ -1,4 +1,8 @@
 .opportunities-page h1 { font-size: 22px; margin-bottom: 20px; }
+.opportunities-page__toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.opportunities-page__search { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); }
+.opportunities-page__search input { background: transparent; border: 0; outline: none; color: #fff; width: 100%; }
+.opportunities-page__filter { border: 0; border-radius: 999px; padding: 10px 14px; background: rgba(255,255,255,0.06); color: #fff; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .opportunities-list { display: flex; flex-direction: column; gap: 16px; }
 .opportunity-card { padding: 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
 .opportunity-card__type { font-size: 11px; text-transform: uppercase; color: #2d8cff; font-weight: 600; }
@@ -6,4 +10,5 @@
 .opportunity-card__company { color: #bcbcbc; font-size: 14px; margin-bottom: 8px; }
 .opportunity-card p { font-size: 14px; line-height: 1.5; }
 .opportunity-card__deadline { color: #bcbcbc; font-size: 13px; margin-top: 8px; }
-.opportunity-card__actions { display: flex; gap: 8px; margin-top: 16px; }
+.opportunity-card__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; align-items: center; }
+.opportunity-card__badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 999px; background: rgba(45,140,255,0.16); color: #7dd3fc; font-size: 13px; }

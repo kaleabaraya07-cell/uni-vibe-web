@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./VibeCard.css";
 import {
   Heart,
@@ -8,6 +9,7 @@ import {
   BadgeCheck,
   Music,
   Scan,
+  Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFeed } from "../../context/FeedContext";
@@ -22,13 +24,14 @@ function VibeCard({ vibe }) {
   const { user, media, caption, music, likes, comments, shares, saves, type } = vibe;
   const liked = isLiked(vibe.id);
   const saved = isSaved(vibe.id);
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <article className="vibe-card">
       <img src={media} alt="" className="vibe-card__media" />
 
       <div className="vibe-card__actions">
-        <button type="button" className="vibe-card__action" onClick={() => toggleLike(vibe.id)}>
+        <button type="button" className={`vibe-card__action ${liked ? "active" : ""}`} onClick={() => toggleLike(vibe.id)}>
           <Heart size={26} fill={liked ? "#ff4757" : "none"} color={liked ? "#ff4757" : "white"} />
           <span>{formatCount(likes)}</span>
         </button>
@@ -40,11 +43,11 @@ function VibeCard({ vibe }) {
           <Share2 size={26} />
           <span>{formatCount(shares)}</span>
         </button>
-        <button type="button" className="vibe-card__action" onClick={() => toggleSave(vibe.id)}>
+        <button type="button" className={`vibe-card__action ${saved ? "active" : ""}`} onClick={() => toggleSave(vibe.id)}>
           <Bookmark size={26} fill={saved ? "#2d8cff" : "none"} color={saved ? "#2d8cff" : "white"} />
           <span>{formatCount(saves)}</span>
         </button>
-        <button type="button" className="vibe-card__action vibe-card__action--more">
+        <button type="button" className="vibe-card__action vibe-card__action--more" onClick={() => setExpanded((prev) => !prev)}>
           <MoreHorizontal size={26} />
         </button>
       </div>
@@ -63,21 +66,23 @@ function VibeCard({ vibe }) {
           </div>
         </Link>
 
-        <p className="vibe-card__caption">{caption}</p>
+        <p className="vibe-card__caption">{expanded ? caption : `${caption.slice(0, 90)}${caption.length > 90 ? "…" : ""}`}</p>
 
         <div className="vibe-card__footer">
           <div className="vibe-card__music">
             <Music size={14} />
             <span>{music}</span>
           </div>
-          <button
-            type="button"
-            className="vibe-card__see-through"
-            onClick={() => openSeeThrough(vibe, type)}
-          >
-            <Scan size={16} />
-            {t("common.seeThrough")}
-          </button>
+          <div className="vibe-card__footer-actions">
+            <button type="button" className="vibe-card__mini" onClick={() => openSeeThrough(vibe, type)}>
+              <Scan size={16} />
+              {t("common.seeThrough")}
+            </button>
+            <button type="button" className="vibe-card__mini">
+              <Sparkles size={16} />
+              Remix
+            </button>
+          </div>
         </div>
       </div>
     </article>
