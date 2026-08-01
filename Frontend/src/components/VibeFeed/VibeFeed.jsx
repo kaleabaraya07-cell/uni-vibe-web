@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useFeed } from "../../context/FeedContext";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import VibeCard from "../VibeCard/VibeCard";
-import Stories from "../Stories/Stories";
 import LoadingSkeleton from "../ui/LoadingSkeleton/LoadingSkeleton";
 import "./VibeFeed.css";
 
@@ -28,12 +27,7 @@ function VibeFeed() {
     );
   }, [hasMore, loading, sentinelRef, visibleItems]);
 
-  return (
-    <div className="vibe-feed">
-      <Stories />
-      {feedContent}
-    </div>
-  );
+  return <div className="vibe-feed">{feedContent}</div>;
 }
 
 export default VibeFeed;

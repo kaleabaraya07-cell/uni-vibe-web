@@ -35,6 +35,50 @@
   border-color: #2d8cff;
 }
 
+.upload-modal__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 120px;
+  border: 1px dashed rgba(255,255,255,0.16);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  color: #bcbcbc;
+  text-align: center;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.upload-modal__dropzone.active {
+  border-color: #2d8cff;
+  color: #fff;
+}
+
+.upload-modal__dropzone input {
+  display: none;
+}
+
+.upload-modal__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.upload-modal__option {
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  padding: 10px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
 .upload-modal__preview {
   position: relative;
   height: 220px;
@@ -62,6 +106,23 @@
 .upload-modal__label {
   font-size: 13px;
   color: #bcbcbc;
+}
+
+.upload-modal__detail-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.upload-modal__detail-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(45,140,255,0.16);
+  color: #8bd3ff;
+  font-size: 12px;
 }
 
 .upload-modal__select {

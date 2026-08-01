@@ -1,25 +1,36 @@
 .bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 900;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 12px 24px;
-  height: 80px;
+  gap: 8px;
+  padding: 10px 16px;
+  height: 86px;
+  width: min(92vw, 680px);
   box-sizing: border-box;
+  border-radius: 999px;
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.28);
 }
 
 .bottom-nav__item {
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   background: none;
   border: none;
   color: #bcbcbc;
   font-size: 11px;
   cursor: pointer;
-  padding: 8px 16px;
+  padding: 8px 10px;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.2s, transform 0.2s;
 }
 
 .bottom-nav__item.active {
@@ -28,11 +39,12 @@
 
 .bottom-nav__item:hover {
   color: white;
+  transform: translateY(-1px);
 }
 
 .bottom-nav__create {
-  width: 56px;
-  height: 56px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   background: linear-gradient(135deg, #2d8cff, #0066ff);
   border: none;
@@ -45,7 +57,7 @@
     0 0 30px rgba(45, 140, 255, 0.5),
     0 4px 20px rgba(0, 102, 255, 0.3);
   transition: transform 0.2s, box-shadow 0.2s;
-  margin-top: -20px;
+  margin-top: -24px;
 }
 
 .bottom-nav__create:hover {

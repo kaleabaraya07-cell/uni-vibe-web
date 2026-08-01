@@ -7,7 +7,7 @@ import { useLocale } from "../../context/LocaleContext";
 import Modal from "../ui/Modal/Modal";
 import Input from "../ui/Input/Input";
 import Button from "../ui/Button/Button";
-import { Camera, Video, Sparkles, Megaphone, Building2, MessageSquareText, CheckCircle2 } from "lucide-react";
+import { Camera, Video, Sparkles, Megaphone, Building2, MessageSquareText, CheckCircle2, Image as ImageIcon, UploadCloud, Check } from "lucide-react";
 import "./UploadModal.css";
 
 const categories = ["Sports", "Events", "Campus life", "Food", "Memes", "Startup ideas"];
@@ -23,8 +23,9 @@ function UploadModal() {
   const [caption, setCaption] = useState("");
   const [category, setCategory] = useState(categories[0]);
   const [mediaType, setMediaType] = useState("Photo");
-  const [preview] = useState("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80");
+  const [preview, setPreview] = useState("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80");
   const [publishing, setPublishing] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const stepLabel = useMemo(() => {
     if (step === 1) return "Choose vibe type";
@@ -63,7 +64,19 @@ function UploadModal() {
 
   const closeModal = () => {
     setStep(1);
+    setCaption("");
+    setCategory(categories[0]);
+    setMediaType("Photo");
+    setPreview("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80");
+    setDragActive(false);
     closeUpload();
+  };
+
+  const handleFileSelection = (file) => {
+    if (!file) return;
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+    setStep(2);
   };
 
   return (
@@ -80,6 +93,21 @@ function UploadModal() {
                 </button>
               ))}
             </div>
+            <label
+              className={`upload-modal__dropzone ${dragActive ? "active" : ""}`}
+              onDragOver={(event) => { event.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={(event) => { event.preventDefault(); setDragActive(false); handleFileSelection(event.dataTransfer.files?.[0]); }}
+            >
+              <input type="file" accept="image/*,video/*" onChange={(event) => handleFileSelection(event.target.files?.[0])} />
+              <UploadCloud size={20} />
+              <span>Drag & drop or click to choose a photo or video</span>
+            </label>
+            <div className="upload-modal__options">
+              <button type="button" className="upload-modal__option" onClick={() => setStep(2)}><ImageIcon size={16} /> Photo</button>
+              <button type="button" className="upload-modal__option" onClick={() => setStep(2)}><Video size={16} /> Video</button>
+              <button type="button" className="upload-modal__option" onClick={() => setStep(2)}><Camera size={16} /> Camera</button>
+            </div>
             <Button variant="primary" className="upload-modal__publish" onClick={() => setStep(2)}>Continue to preview</Button>
           </>
         )}
@@ -93,6 +121,11 @@ function UploadModal() {
                 <span>Tap through to preview your vibe</span>
               </div>
             </div>
+            <div className="upload-modal__detail-list">
+              <span className="upload-modal__detail-pill"><Check size={14} /> Caption</span>
+              <span className="upload-modal__detail-pill"><Check size={14} /> Hashtags</span>
+              <span className="upload-modal__detail-pill"><Check size={14} /> University</span>
+            </div>
             <Button variant="secondary" className="upload-modal__publish" onClick={() => setStep(3)}>Continue to details</Button>
           </>
         )}
@@ -100,6 +133,13 @@ function UploadModal() {
         {step === 3 && (
           <>
             <Input label={t("upload.caption")} value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="What’s the vibe?" />
+            <label className="upload-modal__label">Hashtags</label>
+            <input className="upload-modal__select" placeholder="#CampusLife #EPSU" />
+            <label className="upload-modal__label">Choose University</label>
+            <select className="upload-modal__select" value={user?.university || "EPSU"} onChange={() => {}}>
+              <option value="EPSU">EPSU</option>
+              <option value="AAU">AAU</option>
+            </select>
             <label className="upload-modal__label">{t("upload.category")}</label>
             <select className="upload-modal__select" value={category} onChange={(e) => setCategory(e.target.value)}>
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}

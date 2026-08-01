@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Sparkles, Camera, Clock3 } from "lucide-react";
+import { Plus, Sparkles, Camera, Clock3, Video, Image as ImageIcon, CheckCircle2 } from "lucide-react";
 import Modal from "../ui/Modal/Modal";
 import Input from "../ui/Input/Input";
 import Button from "../ui/Button/Button";
 import StoryViewer from "../StoryViewer/StoryViewer";
 import { mockStories } from "../../data/mockStories";
 import { useAuth } from "../../context/useAuth";
+import StoryRing from "../StoryRing/StoryRing";
 import "./Stories.css";
 
 function Stories() {
@@ -18,6 +19,7 @@ function Stories() {
   const [preview, setPreview] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [now, setNow] = useState(() => Date.now());
+  const [composerStep, setComposerStep] = useState("create");
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -56,7 +58,7 @@ function Stories() {
         type: draftType,
         media: preview || "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=900&q=80",
         text: draftText,
-        expiresAt: Date.now() + 1000 * 60 * 60 * 12,
+        expiresAt: Date.now() + 1000 * 60 * 60 * 24,
         viewed: false,
       };
       setStories((prev) => [newStory, ...prev]);
@@ -64,6 +66,7 @@ function Stories() {
       setPreview("");
       setPublishing(false);
       setComposerOpen(false);
+      setComposerStep("create");
       setActiveIndex(0);
     }, 900);
   };
@@ -81,7 +84,7 @@ function Stories() {
       </div>
 
       <div className="stories-list">
-        <button type="button" className="story-pill story-pill--add" onClick={() => setComposerOpen(true)}>
+        <button type="button" className="story-pill story-pill--add" onClick={() => { setComposerOpen(true); setComposerStep("create"); }}>
           <div className="story-pill__avatar story-pill__avatar--add">
             <Plus size={18} />
           </div>
@@ -113,31 +116,49 @@ function Stories() {
         />
       )}
 
-      <Modal open={composerOpen} onClose={() => setComposerOpen(false)} title="Create a story">
+      <Modal open={composerOpen} onClose={() => { setComposerOpen(false); setComposerStep("create"); }} title="Create a story">
         <div className="story-composer">
-          <div className="story-composer__type-row">
-            {['image', 'video', 'text'].map((type) => (
-              <button
-                key={type}
-                type="button"
-                className={`story-composer__type ${draftType === type ? "active" : ""}`}
-                onClick={() => setDraftType(type)}
-              >
-                {type === 'image' ? <Camera size={14} /> : type === 'video' ? <Sparkles size={14} /> : <Sparkles size={14} />}
-                {type}
-              </button>
-            ))}
-          </div>
+          {composerStep === "create" ? (
+            <>
+              <div className="story-composer__type-row">
+                {['image', 'video', 'text'].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    className={`story-composer__type ${draftType === type ? "active" : ""}`}
+                    onClick={() => setDraftType(type)}
+                  >
+                    {type === 'image' ? <ImageIcon size={14} /> : type === 'video' ? <Video size={14} /> : <Sparkles size={14} />}
+                    {type}
+                  </button>
+                ))}
+              </div>
 
-          <label className="story-composer__dropzone">
-            <input type="file" accept="image/*,video/*" onChange={handlePreview} />
-            {preview ? <img src={preview} alt="preview" className="story-composer__preview" /> : <span>Drop a photo or video to preview</span>}
-          </label>
+              <label className="story-composer__dropzone">
+                <input type="file" accept="image/*,video/*" onChange={handlePreview} />
+                {preview ? <img src={preview} alt="preview" className="story-composer__preview" /> : <span>Drop a photo or video to preview</span>}
+              </label>
 
-          <Input label="Caption" value={draftText} onChange={(e) => setDraftText(e.target.value)} placeholder="Share what’s happening" />
-          <Button variant="primary" onClick={handlePublishStory} disabled={publishing || !draftText.trim()}>
-            {publishing ? "Publishing…" : "Publish story"}
-          </Button>
+              <Input label="Caption" value={draftText} onChange={(e) => setDraftText(e.target.value)} placeholder="Share what’s happening" />
+              <Button variant="primary" onClick={() => setComposerStep("preview")} disabled={!draftText.trim() && !preview}>
+                Preview story
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="story-composer__preview-card">
+                {preview ? <img src={preview} alt="preview" className="story-composer__preview-card-image" /> : <div className="story-composer__text-card">{draftText}</div>}
+              </div>
+              <div className="story-composer__meta">
+                <div><strong>{user?.name}</strong><p>{draftText}</p></div>
+                <span className="story-composer__pill">24h • Active</span>
+              </div>
+              <Button variant="primary" onClick={handlePublishStory} disabled={publishing || !draftText.trim()}>
+                {publishing ? "Publishing…" : "Post story"}
+              </Button>
+              <Button variant="secondary" onClick={() => setComposerStep("create")}>Back</Button>
+            </>
+          )}
         </div>
       </Modal>
     </section>

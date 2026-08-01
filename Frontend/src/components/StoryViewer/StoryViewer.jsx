@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Pause, Play, X, Clock3 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play, X, Clock3, Camera, Sparkles } from "lucide-react";
 import "./StoryViewer.css";
 
 function StoryViewer({ stories, activeIndex, onClose, onNext, onPrev }) {
@@ -7,6 +7,7 @@ function StoryViewer({ stories, activeIndex, onClose, onNext, onPrev }) {
   const [paused, setPaused] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const story = stories[activeIndex];
+  const showSwitch = stories.length > 1;
 
   useEffect(() => {
     if (!story || paused) return undefined;
@@ -72,9 +73,11 @@ function StoryViewer({ stories, activeIndex, onClose, onNext, onPrev }) {
         </div>
 
         <div className="story-viewer__content">
-          <button type="button" className="story-viewer__nav story-viewer__nav--left" onClick={onPrev}>
-            <ChevronLeft size={20} />
-          </button>
+          {showSwitch && (
+            <button type="button" className="story-viewer__nav story-viewer__nav--left" onClick={onPrev}>
+              <ChevronLeft size={20} />
+            </button>
+          )}
 
           <div className="story-viewer__media-shell" onClick={() => setPaused((prev) => !prev)}>
             {story.type === "video" && story.media ? (
@@ -92,9 +95,11 @@ function StoryViewer({ stories, activeIndex, onClose, onNext, onPrev }) {
             </div>
           </div>
 
-          <button type="button" className="story-viewer__nav story-viewer__nav--right" onClick={onNext}>
-            <ChevronRight size={20} />
-          </button>
+          {showSwitch && (
+            <button type="button" className="story-viewer__nav story-viewer__nav--right" onClick={onNext}>
+              <ChevronRight size={20} />
+            </button>
+          )}
         </div>
       </div>
     </div>

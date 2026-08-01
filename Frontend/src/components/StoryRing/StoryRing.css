@@ -1,0 +1,56 @@
+.story-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 72px;
+}
+
+.story-ring--compact {
+  min-width: 60px;
+}
+
+.story-ring__avatar {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  border: 0;
+  padding: 2px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  cursor: pointer;
+}
+
+.story-ring__avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.story-ring__avatar--active {
+  background: linear-gradient(135deg, #2d8cff, #60a5fa);
+  box-shadow: 0 0 0 3px rgba(45, 140, 255, 0.2);
+}
+
+.story-ring__add {
+  position: absolute;
+  right: -2px;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2d8cff, #60a5fa);
+  color: #fff;
+}
+
+.story-ring__label {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}

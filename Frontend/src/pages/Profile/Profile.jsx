@@ -1,16 +1,19 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { getUserById } from "../../data/mockUsers";
+import { useParams, useNavigate } from "react-router-dom";
+import { getUserById, currentUser, mockUsers } from "../../data/mockUsers";
 import { mockVibes } from "../../data/mockVibes";
 import ProfileHeader from "../../components/ProfileHeader/ProfileHeader";
+import StoryRing from "../../components/StoryRing/StoryRing";
 import { Award, Bookmark, Camera, PlayCircle, Settings, Sparkles } from "lucide-react";
 import "./Profile.css";
 
 function Profile() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const user = getUserById(id);
   const [following, setFollowing] = useState(false);
   const vibes = mockVibes.filter((v) => v.user.id === id);
+  const storyUsers = [currentUser, ...mockUsers.filter((person) => person.id !== currentUser.id)].slice(0, 5);
 
   if (!user) return <p>User not found</p>;
 
@@ -31,6 +34,12 @@ function Profile() {
         <span className="profile-page__toolbar-pill">Events</span>
         <span className="profile-page__toolbar-pill">Clubs</span>
         <span className="profile-page__toolbar-pill"><Settings size={14} /> Settings</span>
+      </div>
+
+      <div className="profile-page__story-strip">
+        {storyUsers.map((person) => (
+          <StoryRing key={person.id} user={person} onProfileClick={() => navigate(`/profile/${person.id}`)} compact />
+        ))}
       </div>
 
       <div className="profile-vibes">

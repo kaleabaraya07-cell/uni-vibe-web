@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "./VibeCard.css";
 import {
   Heart,
@@ -10,6 +10,17 @@ import {
   Music,
   Scan,
   Sparkles,
+  X,
+  Send,
+  Copy,
+  MessageSquare,
+  Zap,
+  EyeOff,
+  Flag,
+  Ban,
+  Volume2,
+  FolderPlus,
+  Clock3,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useFeed } from "../../context/FeedContext";
@@ -25,6 +36,25 @@ function VibeCard({ vibe }) {
   const liked = isLiked(vibe.id);
   const saved = isSaved(vibe.id);
   const [expanded, setExpanded] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [commentCount, setCommentCount] = useState(comments);
+
+  const demoComments = useMemo(
+    () => [
+      { id: 1, user: "Hana", text: "This is such a good campus vibe ✨", time: "2m", liked: true, replies: [{ id: 11, user: "Abel", text: "Totally agree", time: "1m" }] },
+      { id: 2, user: "Mesay", text: "Can’t wait for the event 🎉", time: "8m", liked: false, replies: [] },
+    ],
+    []
+  );
+
+  const handleAddComment = () => {
+    if (!commentText.trim()) return;
+    setCommentCount((prev) => prev + 1);
+    setCommentText("");
+  };
 
   return (
     <article className="vibe-card">
@@ -35,11 +65,11 @@ function VibeCard({ vibe }) {
           <Heart size={26} fill={liked ? "#ff4757" : "none"} color={liked ? "#ff4757" : "white"} />
           <span>{formatCount(likes)}</span>
         </button>
-        <button type="button" className="vibe-card__action" onClick={() => addComment(vibe.id)}>
+        <button type="button" className="vibe-card__action" onClick={() => { addComment(vibe.id); setCommentsOpen(true); }}>
           <MessageCircle size={26} />
-          <span>{formatCount(comments)}</span>
+          <span>{formatCount(commentCount)}</span>
         </button>
-        <button type="button" className="vibe-card__action" onClick={() => toggleShare(vibe.id)}>
+        <button type="button" className="vibe-card__action" onClick={() => { toggleShare(vibe.id); setShareOpen(true); }}>
           <Share2 size={26} />
           <span>{formatCount(shares)}</span>
         </button>
@@ -47,10 +77,79 @@ function VibeCard({ vibe }) {
           <Bookmark size={26} fill={saved ? "#2d8cff" : "none"} color={saved ? "#2d8cff" : "white"} />
           <span>{formatCount(saves)}</span>
         </button>
-        <button type="button" className="vibe-card__action vibe-card__action--more" onClick={() => setExpanded((prev) => !prev)}>
+        <button type="button" className="vibe-card__action vibe-card__action--more" onClick={() => setMenuOpen((prev) => !prev)}>
           <MoreHorizontal size={26} />
         </button>
       </div>
+
+      {menuOpen && (
+        <div className="vibe-card__menu">
+          <button type="button"><Zap size={16} /> Interested</button>
+          <button type="button"><EyeOff size={16} /> Not Interested</button>
+          <button type="button"><Flag size={16} /> Hide Post</button>
+          <button type="button"><Ban size={16} /> Report</button>
+          <button type="button"><Volume2 size={16} /> Mute User</button>
+          <button type="button"><FolderPlus size={16} /> Save to Collection</button>
+          <button type="button"><Clock3 size={16} /> Playback Speed</button>
+          <button type="button"><Copy size={16} /> Copy Link</button>
+          <button type="button"><MessageSquare size={16} /> View Profile</button>
+          <button type="button" onClick={() => setMenuOpen(false)}>Cancel</button>
+        </div>
+      )}
+
+      {commentsOpen && (
+        <div className="vibe-card__sheet vibe-card__sheet--comments">
+          <div className="vibe-card__sheet-header">
+            <h3>Comments</h3>
+            <button type="button" className="vibe-card__sheet-close" onClick={() => setCommentsOpen(false)}><X size={16} /></button>
+          </div>
+          <div className="vibe-card__comment-list">
+            {demoComments.map((comment) => (
+              <div key={comment.id} className="vibe-card__comment-item">
+                <div className="vibe-card__comment-main">
+                  <strong>{comment.user}</strong>
+                  <p>{comment.text}</p>
+                  <span>{comment.time}</span>
+                </div>
+                {comment.replies.length > 0 && (
+                  <div className="vibe-card__reply-list">
+                    {comment.replies.map((reply) => (
+                      <div key={reply.id} className="vibe-card__reply-item">
+                        <strong>{reply.user}</strong>
+                        <p>{reply.text}</p>
+                        <span>{reply.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="vibe-card__composer">
+            <input value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Write a comment..." />
+            <button type="button" onClick={handleAddComment}><Send size={16} /></button>
+          </div>
+        </div>
+      )}
+
+      {shareOpen && (
+        <div className="vibe-card__sheet vibe-card__sheet--share">
+          <div className="vibe-card__sheet-header">
+            <h3>Share</h3>
+            <button type="button" className="vibe-card__sheet-close" onClick={() => setShareOpen(false)}><X size={16} /></button>
+          </div>
+          <div className="vibe-card__share-grid">
+            <button type="button"><Copy size={16} /> Copy Link</button>
+            <button type="button"><MessageSquare size={16} /> WhatsApp</button>
+            <button type="button"><Send size={16} /> Telegram</button>
+            <button type="button"><Sparkles size={16} /> Facebook</button>
+            <button type="button"><MessageCircle size={16} /> Messenger</button>
+            <button type="button"><Share2 size={16} /> X</button>
+          </div>
+          <button type="button" className="vibe-card__share-action">Download Video</button>
+          <button type="button" className="vibe-card__share-action vibe-card__share-action--secondary" onClick={() => setShareOpen(false)}>Cancel</button>
+        </div>
+      )}
 
       <div className="vibe-card__overlay">
         <Link to={`/profile/${user.id}`} className="vibe-card__user">

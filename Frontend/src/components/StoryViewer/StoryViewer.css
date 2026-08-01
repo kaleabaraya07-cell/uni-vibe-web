@@ -109,7 +109,7 @@
 
 .story-viewer__content {
   display: grid;
-  grid-template-columns: 48px 1fr 48px;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
   align-items: center;
   gap: 10px;
   padding: 0 16px 16px;
