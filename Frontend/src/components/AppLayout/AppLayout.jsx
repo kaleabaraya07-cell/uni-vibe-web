@@ -18,6 +18,7 @@ function AppLayout() {
         </div>
         <RightSidebar />
       </main>
+      <BottomNav />
       <SeeThrough />
       <UploadModal />
     </div>
