@@ -9,6 +9,7 @@ export function FeedProvider({ children }) {
   const [liked, setLiked] = useState(new Set());
   const [saved, setSaved] = useState(new Set());
   const [shared, setShared] = useState(new Set());
+  const [hiddenIds, setHiddenIds] = useState(new Set());
 
   const toggleLike = useCallback((id) => {
     setLiked((prev) => {
@@ -57,6 +58,15 @@ export function FeedProvider({ children }) {
     setVibes((prev) => [vibe, ...prev]);
   }, []);
 
+  const hideVibe = useCallback((id) => {
+    setHiddenIds((prev) => new Set(prev).add(id));
+    setVibes((prev) => prev.filter((vibe) => vibe.id !== id));
+  }, []);
+
+  const increaseRecommendation = useCallback((id) => {
+    setVibes((prev) => prev.map((vibe) => (vibe.id === id ? { ...vibe, recommendationScore: (vibe.recommendationScore || 0) + 1 } : vibe)));
+  }, []);
+
   const getSavedVibes = useCallback(
     () => vibes.filter((v) => saved.has(v.id)),
     [vibes, saved]
@@ -74,6 +84,8 @@ export function FeedProvider({ children }) {
         toggleShare,
         addComment,
         addVibe,
+        hideVibe,
+        increaseRecommendation,
         getSavedVibes,
         isLiked: (id) => liked.has(id),
         isSaved: (id) => saved.has(id),

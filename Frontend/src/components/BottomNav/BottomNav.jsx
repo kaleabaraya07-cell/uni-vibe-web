@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom";
-import GlassPanel from "../GlassPanel/GlassPanel";
 import { Trophy, Megaphone, Plus, MessageCircle, User } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../context/LocaleContext";
@@ -18,7 +17,7 @@ function BottomNav() {
   const { openUpload } = useUpload();
 
   return (
-    <GlassPanel className="bottom-nav">
+    <div className="bottom-nav">
       {bottomNavItems.map((item) => {
         const Icon = iconMap[item.icon];
         if (item.primary) {
@@ -36,7 +35,7 @@ function BottomNav() {
           </NavLink>
         );
       })}
-    </GlassPanel>
+    </div>
   );
 }
 

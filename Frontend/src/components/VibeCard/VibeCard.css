@@ -261,15 +261,36 @@
   color: #7dd3fc;
 }
 
+.vibe-card__speed-trigger {
+  justify-content: space-between;
+  width: 100%;
+}
+
 .vibe-card__speed-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  padding-top: 4px;
 }
 
 .vibe-card__speed-row button {
   flex: 1 1 calc(50% - 6px);
   justify-content: center;
+  gap: 6px;
+}
+
+.vibe-card__speed-row button.active {
+  background: rgba(45,140,255,0.22);
+}
+
+.vibe-card__report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vibe-card__report-item {
+  justify-content: flex-start;
 }
 
 .vibe-card__share-grid {
