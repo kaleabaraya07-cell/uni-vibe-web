@@ -15,6 +15,7 @@ function AppLayout() {
         <LeftSidebar />
         <div className="app-layout__main">
           <Outlet />
+          <BottomNav />
         </div>
         <RightSidebar />
       </main>
