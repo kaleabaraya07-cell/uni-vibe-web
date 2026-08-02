@@ -127,7 +127,7 @@ function VibeCard({ vibe }) {
       </div>
 
       {(menuOpen || menuClosing) && (
-        <div ref={menuRef} className={`vibe-card__menu ${menuClosing ? "closing" : "open"}`}>
+        <div ref={menuRef} role="menu" aria-label="Post actions" tabIndex={-1} className={`vibe-card__menu ${menuClosing ? "closing" : "open"}`}>
           <button type="button" onClick={closeMenu}><Zap size={16} /> Interested</button>
           <button type="button" onClick={closeMenu}><EyeOff size={16} /> Not Interested</button>
           <button type="button" onClick={closeMenu}><Flag size={16} /> Hide Post</button>
