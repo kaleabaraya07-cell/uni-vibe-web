@@ -8,9 +8,9 @@
   align-items: center;
   justify-content: space-around;
   gap: 8px;
-  padding: 10px 16px;
-  height: 76px;
-  width: min(94vw, 400px);
+  padding: 9px 15px;
+  height: 72px;
+  width: min(95vw, 410px);
   box-sizing: border-box;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
