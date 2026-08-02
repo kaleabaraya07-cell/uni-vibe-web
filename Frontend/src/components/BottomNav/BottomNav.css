@@ -1,5 +1,5 @@
 .bottom-nav {
-  position: fixed;
+  position: absolute;
   left: 50%;
   bottom: 12px;
   transform: translateX(-50%);
@@ -10,7 +10,8 @@
   gap: 6px;
   padding: 8px 12px;
   height: 72px;
-  width: min(90vw, 380px);
+  width: calc(100% - 24px);
+  max-width: 100%;
   box-sizing: border-box;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
