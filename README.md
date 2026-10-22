@@ -443,6 +443,6 @@ As the project develops, this repository can become a foundation for collaborati
 
 Uni Vibe — The Digital Home of University Life
 
-Founded and led by Kal.
+Founded and led by Kalab Araya.
 
 Built with a vision to connect students, celebrate campus life, and bring university communities together.
