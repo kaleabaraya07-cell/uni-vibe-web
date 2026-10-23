@@ -169,21 +169,22 @@
 .vibe-card__menu,
 .vibe-card__sheet {
   position: absolute;
-  right: 12px;
+  right: 72px;
   top: 16px;
-  width: min(92vw, 320px);
+  width: min(92vw, 280px);
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 12px;
   border-radius: 20px;
-  background: rgba(15, 23, 42, 0.86);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255,255,255,0.15);
   box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   z-index: 20;
   animation: vibe-card-menu-open 0.2s ease forwards;
+  transform-origin: top right;
 }
 
 .vibe-card__menu.closing {
@@ -297,15 +298,36 @@
   color: #7dd3fc;
 }
 
+.vibe-card__speed-trigger {
+  justify-content: space-between;
+  width: 100%;
+}
+
 .vibe-card__speed-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  padding-top: 4px;
 }
 
 .vibe-card__speed-row button {
   flex: 1 1 calc(50% - 6px);
   justify-content: center;
+  gap: 6px;
+}
+
+.vibe-card__speed-row button.active {
+  background: rgba(45,140,255,0.22);
+}
+
+.vibe-card__report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vibe-card__report-item {
+  justify-content: flex-start;
 }
 
 .vibe-card__share-grid {

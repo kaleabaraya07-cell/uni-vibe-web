@@ -22,8 +22,11 @@ import {
   Volume2,
   FolderPlus,
   Clock3,
+  ChevronRight,
+  Check,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Modal from "../ui/Modal/Modal";
 import { useFeed } from "../../context/FeedContext";
 import { useSeeThrough } from "../../context/SeeThroughContext";
 import { useLocale } from "../../context/LocaleContext";
@@ -82,6 +85,7 @@ function VibeCard({ vibe }) {
   const closeMenu = () => {
     if (!menuOpen && !menuClosing) return;
     setMenuClosing(true);
+    setSpeedMenuOpen(false);
     window.setTimeout(() => {
       setMenuOpen(false);
       setMenuClosing(false);
@@ -194,23 +198,30 @@ function VibeCard({ vibe }) {
       </div>
 
       {(menuOpen || menuClosing) && (
-        <div ref={menuRef} className={`vibe-card__menu ${menuClosing ? "closing" : "open"}`}>
-          <button type="button" onClick={closeMenu}><Zap size={16} /> Interested</button>
-          <button type="button" onClick={closeMenu}><EyeOff size={16} /> Not Interested</button>
-          <button type="button" onClick={closeMenu}><Flag size={16} /> Hide Post</button>
+        <div ref={menuRef} role="menu" aria-label="Post actions" tabIndex={-1} className={`vibe-card__menu ${menuClosing ? "closing" : "open"}`}>
+          <button type="button" onClick={() => { increaseRecommendation(vibe.id); closeMenu(); }}><Zap size={16} /> Interested</button>
+          <button type="button" onClick={() => { hideVibe(vibe.id); closeMenu(); }}><EyeOff size={16} /> Not Interested</button>
+          <button type="button" onClick={() => { hideVibe(vibe.id); closeMenu(); }}><Flag size={16} /> Hide Post</button>
           <button type="button" onClick={closeMenu}><FolderPlus size={16} /> Save to Collection</button>
           <button type="button" onClick={closeMenu}><Copy size={16} /> Copy Link</button>
-          <button type="button" onClick={closeMenu}><Ban size={16} /> Report</button>
+          <button type="button" onClick={() => { setReportOpen(true); closeMenu(); }}><Ban size={16} /> Report</button>
           <button type="button" onClick={closeMenu}><Volume2 size={16} /> Block User</button>
           <button type="button" onClick={closeMenu}><Volume2 size={16} /> Mute User</button>
           <div className="vibe-card__menu-group">
-            <span>Playback Speed</span>
-            <div className="vibe-card__speed-row">
-              <button type="button" onClick={closeMenu}>0.5×</button>
-              <button type="button" onClick={closeMenu}>1×</button>
-              <button type="button" onClick={closeMenu}>1.5×</button>
-              <button type="button" onClick={closeMenu}>2×</button>
-            </div>
+            <button type="button" className="vibe-card__speed-trigger" onClick={() => setSpeedMenuOpen((prev) => !prev)}>
+              <span>Playback Speed</span>
+              <ChevronRight size={14} />
+            </button>
+            {speedMenuOpen && (
+              <div className="vibe-card__speed-row">
+                {[0.5, 1, 1.5, 2].map((value) => (
+                  <button key={value} type="button" className={playbackSpeed === value ? "active" : ""} onClick={() => { setPlaybackSpeed(value); setSpeedMenuOpen(false); }}>
+                    {value === 1 ? "1.0x" : `${value}x`}
+                    {playbackSpeed === value && <Check size={12} />}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -268,6 +279,16 @@ function VibeCard({ vibe }) {
           <button type="button" className="vibe-card__share-action vibe-card__share-action--secondary" onClick={() => setShareOpen(false)}>Cancel</button>
         </div>
       )}
+
+      <Modal open={reportOpen} onClose={() => setReportOpen(false)} title="Report post">
+        <div className="vibe-card__report-list">
+          {['Spam', 'Violence', 'Harassment', 'False Information', 'Nudity', 'Other'].map((reason) => (
+            <button key={reason} type="button" className="vibe-card__report-item" onClick={() => setReportOpen(false)}>
+              {reason}
+            </button>
+          ))}
+        </div>
+      </Modal>
 
       <div className="vibe-card__overlay">
         <Link to={`/profile/${user.id}`} className="vibe-card__user">

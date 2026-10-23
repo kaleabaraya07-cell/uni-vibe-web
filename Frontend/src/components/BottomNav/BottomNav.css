@@ -1,23 +1,24 @@
 .bottom-nav {
   position: fixed;
   left: 50%;
-  bottom: 18px;
+  bottom: 14px;
   transform: translateX(-50%);
-  z-index: 900;
+  z-index: 950;
   display: flex;
   align-items: center;
   justify-content: space-around;
   gap: 8px;
-  padding: 10px 16px;
-  height: 86px;
-  width: min(92vw, 680px);
+  padding: 8px 14px;
+  height: 68px;
+  width: min(96vw, 430px);
   box-sizing: border-box;
   border-radius: 999px;
-  background: rgba(8, 15, 28, 0.58);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 18px 42px rgba(2, 6, 23, 0.26);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow: visible;
 }
 
 .bottom-nav__item {

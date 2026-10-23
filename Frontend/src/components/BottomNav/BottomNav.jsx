@@ -22,7 +22,7 @@ function BottomNav() {
   const { openUpload } = useUpload();
 
   return (
-    <GlassPanel className="bottom-nav">
+    <div className="bottom-nav">
       {bottomNavItems.map((item) => {
         const Icon = iconMap[item.icon] || Home;
         if (item.primary) {
@@ -51,7 +51,7 @@ function BottomNav() {
           </NavLink>
         );
       })}
-    </GlassPanel>
+    </div>
   );
 }
 
