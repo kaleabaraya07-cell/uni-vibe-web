@@ -1,0 +1,268 @@
+.signup-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.signup-title {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 4px;
+  color: #ffffff;
+}
+
+.signup-steps {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.signup-step-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  font-size: 13px;
+  color: #8c9ba5;
+  transition: all 0.2s ease;
+}
+
+.signup-step-pill.active {
+  background: rgba(45, 140, 255, 0.12);
+  border-color: rgba(45, 140, 255, 0.35);
+  color: #2d8cff;
+  font-weight: 600;
+}
+
+.step-num {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+}
+
+.signup-step-pill.active .step-num {
+  background: #2d8cff;
+  color: #ffffff;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.signup-submit {
+  width: 100%;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.signup-question-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signup-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cfd6dc;
+}
+
+.signup-student-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.signup-role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  color: #ffffff;
+}
+
+.signup-role-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.signup-role-card.selected {
+  background: rgba(45, 140, 255, 0.14);
+  border-color: #2d8cff;
+  box-shadow: 0 0 16px rgba(45, 140, 255, 0.25);
+}
+
+.role-icon {
+  color: #2d8cff;
+}
+
+.role-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.role-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.role-desc {
+  font-size: 11px;
+  color: #8c9ba5;
+  line-height: 1.4;
+}
+
+.signup-student-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.signup-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(18, 28, 48, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.signup-select:focus {
+  border-color: #2d8cff;
+}
+
+.signup-select option {
+  background: #0d1627;
+  color: #ffffff;
+}
+
+.signup-link-btn {
+  background: none;
+  border: none;
+  color: #2d8cff;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 0;
+  text-align: left;
+}
+
+.signup-link-btn:hover {
+  text-decoration: underline;
+}
+
+.signup-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(45, 140, 255, 0.08);
+  border: 1px solid rgba(45, 140, 255, 0.2);
+  border-radius: 10px;
+  font-size: 12px;
+  color: #a0c9f7;
+  line-height: 1.4;
+}
+
+.notice-icon {
+  color: #2d8cff;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.signup-explorer-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  font-size: 13px;
+  color: #b0bac5;
+  line-height: 1.5;
+}
+
+.signup-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.signup-back-btn {
+  flex: 0 0 auto;
+}
+
+/* University Request Modal Styles */
+.uni-req-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.uni-req-desc {
+  font-size: 13px;
+  color: #8c9ba5;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.uni-req-submit {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.uni-req-success {
+  text-align: center;
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.uni-req-icon {
+  color: #2ed573;
+}
+
+.uni-req-success h3 {
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.uni-req-success p {
+  font-size: 13px;
+  color: #8c9ba5;
+}

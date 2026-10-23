@@ -7,11 +7,21 @@ export {
   getUniversityById,
   getDepartmentById,
   getClubById,
+  mockUniversityRequests,
+  getDepartmentsByUniversity,
 } from "./mockUniversities";
 export { mockEvents, getEventById } from "./mockEvents";
 export { mockConversations, getConversationById } from "./mockChat";
 export { mockNotifications } from "./mockNotifications";
 export { mockOpportunities, mockLiveStreams, getOpportunityById } from "./mockOpportunities";
+export {
+  CURRENT_SEASON,
+  calculatePostPT,
+  mockLeagueLeaderboard,
+  mockLeagueHighlights,
+  mockTopContributors,
+  mockUserUniversityLeagueInfo,
+} from "./mockRankings";
 
 export const universityStudents = [
   { id: 1, avatar: "https://i.pravatar.cc/80?u=s1" },
@@ -21,9 +31,9 @@ export const universityStudents = [
 ];
 
 export const topContributors = [
-  { rank: 1, name: "Mesay T.", points: "2.8K", avatar: "https://i.pravatar.cc/80?u=mesay" },
-  { rank: 2, name: "Hana M.", points: "2.1K", avatar: "https://i.pravatar.cc/80?u=hana" },
-  { rank: 3, name: "Abel G.", points: "1.9K", avatar: "https://i.pravatar.cc/80?u=abel" },
+  { rank: 1, name: "Mesay T.", points: "48.6 PT", avatar: "https://i.pravatar.cc/80?u=mesay" },
+  { rank: 2, name: "Kalab Araya", points: "42.2 PT", avatar: "https://i.pravatar.cc/80?u=kalab" },
+  { rank: 3, name: "Hana M.", points: "34.5 PT", avatar: "https://i.pravatar.cc/80?u=hana" },
 ];
 
 export const upcomingEvent = {
@@ -45,8 +55,8 @@ export const navItems = [
 ];
 
 export const bottomNavItems = [
-  { id: "uni-vibe", label: "Uni Vibe", icon: "Trophy", path: "/" },
-  { id: "opportunities", label: "Opportunities", icon: "Megaphone", path: "/opportunities" },
+  { id: "home", label: "Home", icon: "Home", path: "/" },
+  { id: "uni-vibe", label: "Uni Vibe", icon: "Trophy", path: "/rankings" },
   { id: "create", label: "Create Post", icon: "Plus", primary: true },
   { id: "chat", label: "Chat", icon: "MessageCircle", path: "/chat" },
   { id: "me", label: "Me", icon: "User", path: "/profile/u1" },

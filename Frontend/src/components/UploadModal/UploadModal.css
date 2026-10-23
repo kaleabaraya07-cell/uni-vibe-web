@@ -158,3 +158,63 @@
 .upload-modal__success-icon {
   color: #34d399;
 }
+
+.upload-modal__verification-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+  gap: 16px;
+}
+
+.verification-gate__badge {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(45, 140, 255, 0.12);
+  border: 1px solid rgba(45, 140, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gate-icon {
+  color: #2d8cff;
+}
+
+.gate-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.gate-message {
+  font-size: 14px;
+  color: #9cb1c4;
+  line-height: 1.5;
+  max-width: 440px;
+  margin: 0;
+}
+
+.gate-pending-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 10px;
+  color: #facc15;
+  font-size: 13px;
+  text-align: left;
+}
+
+.gate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}

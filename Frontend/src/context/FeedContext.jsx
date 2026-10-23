@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback } from "react";
 import { mockVibes } from "../data/mockVibes";
+import { postService } from "../services/postService";
 
 const FeedContext = createContext(null);
 
@@ -8,6 +9,7 @@ export function FeedProvider({ children }) {
   const [vibes, setVibes] = useState(mockVibes);
   const [liked, setLiked] = useState(new Set());
   const [saved, setSaved] = useState(new Set());
+  const [reposted, setReposted] = useState(new Set());
   const [shared, setShared] = useState(new Set());
 
   const toggleLike = useCallback((id) => {
@@ -16,8 +18,8 @@ export function FeedProvider({ children }) {
       const wasLiked = next.has(id);
       if (wasLiked) next.delete(id);
       else next.add(id);
-      setVibes((vibes) =>
-        vibes.map((v) =>
+      setVibes((vibesList) =>
+        vibesList.map((v) =>
           v.id === id ? { ...v, likes: v.likes + (wasLiked ? -1 : 1) } : v
         )
       );
@@ -31,9 +33,26 @@ export function FeedProvider({ children }) {
       const wasSaved = next.has(id);
       if (wasSaved) next.delete(id);
       else next.add(id);
-      setVibes((vibes) =>
-        vibes.map((v) =>
+      setVibes((vibesList) =>
+        vibesList.map((v) =>
           v.id === id ? { ...v, saves: v.saves + (wasSaved ? -1 : 1) } : v
+        )
+      );
+      return next;
+    });
+  }, []);
+
+  const toggleRepost = useCallback((id) => {
+    setReposted((prev) => {
+      const next = new Set(prev);
+      const wasReposted = next.has(id);
+      if (wasReposted) next.delete(id);
+      else next.add(id);
+      setVibes((vibesList) =>
+        vibesList.map((v) =>
+          v.id === id
+            ? { ...v, reposts: (v.reposts || 0) + (wasReposted ? -1 : 1) }
+            : v
         )
       );
       return next;
@@ -68,15 +87,18 @@ export function FeedProvider({ children }) {
         vibes,
         liked,
         saved,
+        reposted,
         shared,
         toggleLike,
         toggleSave,
+        toggleRepost,
         toggleShare,
         addComment,
         addVibe,
         getSavedVibes,
         isLiked: (id) => liked.has(id),
         isSaved: (id) => saved.has(id),
+        isReposted: (id) => reposted.has(id),
       }}
     >
       {children}
