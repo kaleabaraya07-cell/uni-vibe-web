@@ -1,11 +1,19 @@
 .home {
   display: flex;
   justify-content: center;
-  min-height: 620px;
+  width: 100%;
+}
+
+.home__content {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 @media (max-width: 768px) {
-  .home {
-    min-height: 520px;
+  .home__content {
+    gap: 16px;
   }
 }

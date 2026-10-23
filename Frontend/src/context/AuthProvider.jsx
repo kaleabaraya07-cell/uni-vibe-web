@@ -1,56 +1,126 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { currentUser, mockCredentials, mockUsers } from "../data/mockUsers";
+import { mockUniversities } from "../data/mockUniversities";
 import { AuthContext } from "./AuthContext";
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem("univibe_current_user");
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // ignore json parse error
+    }
+    return currentUser; // Default to demo user for seamless UX
+  });
 
-  const login = useCallback((email, password) => {
+  useEffect(() => {
+    try {
+      if (user) {
+        localStorage.setItem("univibe_current_user", JSON.stringify(user));
+      } else {
+        localStorage.removeItem("univibe_current_user");
+      }
+    } catch {
+      // ignore storage error
+    }
+  }, [user]);
+
+  const login = useCallback((email, password, rememberMe = true) => {
+    const cleanEmail = (email || "").trim().toLowerCase();
     if (
-      email === mockCredentials.email &&
+      cleanEmail === mockCredentials.email.toLowerCase() &&
       password === mockCredentials.password
     ) {
       setUser(currentUser);
-      return { ok: true };
+      return { ok: true, user: currentUser };
     }
     const found = mockUsers.find(
-      (u) => u.email === email && password === "demo123"
+      (u) => u.email.toLowerCase() === cleanEmail && password === "demo123"
     );
     if (found) {
       setUser(found);
-      return { ok: true };
+      return { ok: true, user: found };
     }
-    return { ok: false };
+    // Also allow any demo login with password demo123
+    if (cleanEmail && password === "demo123") {
+      const demoFallback = {
+        ...currentUser,
+        email: cleanEmail,
+        name: cleanEmail.split("@")[0],
+      };
+      setUser(demoFallback);
+      return { ok: true, user: demoFallback };
+    }
+    return { ok: false, error: "Invalid email or password" };
   }, []);
 
-  const signup = useCallback((name, username, email) => {
+  const signup = useCallback((params) => {
+    // Supports either an object or legacy signature (name, username, email, password)
+    let payload = params;
+    if (typeof params === "string") {
+      const [name, username, email] = arguments;
+      payload = { name, username, email };
+    }
+
+    const {
+      name,
+      username,
+      email,
+      isStudent = true,
+      universityId = null,
+      departmentId = null,
+      departmentName = "",
+    } = payload;
+
+    const selectedUni = universityId
+      ? mockUniversities.find((u) => u.id === universityId)
+      : null;
+
     const newUser = {
       id: `u${Date.now()}`,
       name,
-      username: username.startsWith("@") ? username : `@${username}`,
+      username: username?.startsWith("@") ? username : `@${username || "user"}`,
       email,
-      avatar: `https://i.pravatar.cc/150?u=${encodeURIComponent(email)}`,
-      university: "EPSU",
-      universityId: "uni1",
-      department: "Undeclared",
-      departmentId: "dept1",
-      year: "1st Year",
-      bio: "",
-      verified: false,
+      avatar: `https://i.pravatar.cc/150?u=${encodeURIComponent(email || name)}`,
+      coverImage: selectedUni?.cover || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80",
+      isStudent: Boolean(isStudent),
+      // Verified students can create posts; new student accounts start with verified=true for demo/prototype or pending
+      verificationStatus: isStudent ? "verified" : "none",
+      verified: Boolean(isStudent),
+      university: selectedUni ? selectedUni.shortName : (isStudent ? "University Student" : ""),
+      universityId: isStudent ? (universityId || "uni1") : null,
+      department: isStudent ? (departmentName || "Engineering") : "",
+      departmentId: isStudent ? departmentId : null,
+      year: isStudent ? "1st Year" : "",
+      bio: isStudent ? "Uni Vibe campus student 🎓" : "Exploring university life on Uni Vibe ✨",
       followers: 0,
       following: 0,
       vibeCount: 0,
+      leaguePT: 0,
     };
+
     setUser(newUser);
-    return { ok: true };
+    return { ok: true, user: newUser };
   }, []);
 
   const socialLogin = useCallback(() => {
     setUser(currentUser);
-    return { ok: true };
+    return { ok: true, user: currentUser };
   }, []);
 
-  const logout = useCallback(() => setUser(null), []);
+  const logout = useCallback(() => {
+    setUser(null);
+    try {
+      localStorage.removeItem("univibe_current_user");
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const switchAccount = useCallback((targetUser) => {
+    setUser(targetUser);
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -61,6 +131,7 @@ export function AuthProvider({ children }) {
         signup,
         socialLogin,
         logout,
+        switchAccount,
       }}
     >
       {children}

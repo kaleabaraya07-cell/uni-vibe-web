@@ -17,6 +17,84 @@
   gap: 14px;
 }
 
+.login__options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-top: -2px;
+}
+
+.login__remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a4b1bc;
+  cursor: pointer;
+  user-select: none;
+}
+
+.login__remember input[type="checkbox"] {
+  accent-color: #2d8cff;
+  cursor: pointer;
+}
+
+.login__forgot-link {
+  background: none;
+  border: none;
+  color: #2d8cff;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.login__forgot-link:hover {
+  text-decoration: underline;
+}
+
+.login__forgot-desc {
+  font-size: 13px;
+  color: #8c9ba5;
+  line-height: 1.5;
+}
+
+.login__forgot-cancel {
+  background: none;
+  border: none;
+  color: #8c9ba5;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.login__forgot-cancel:hover {
+  color: #ffffff;
+}
+
+.login__demo-badge {
+  text-align: center;
+  font-size: 12px;
+  color: #8c9ba5;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.login__demo-badge strong {
+  color: #2d8cff;
+}
+
+.login__success-msg {
+  color: #2ed573;
+  font-size: 13px;
+  text-align: center;
+  padding: 8px;
+  background: rgba(46, 213, 115, 0.1);
+  border-radius: 8px;
+}
+
 .login__error {
   color: #ff4757;
   font-size: 13px;
@@ -51,5 +129,18 @@
 }
 
 .login__switch a:hover {
+  text-decoration: underline;
+}
+
+.login__legal {
+  text-align: center;
+  font-size: 11px;
+  color: #637080;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.login__legal a {
+  color: #8c9ba5;
   text-decoration: underline;
 }
