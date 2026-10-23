@@ -5,6 +5,7 @@ import {
   MessageCircle,
   Share2,
   Bookmark,
+  Repeat,
   MoreHorizontal,
   BadgeCheck,
   Music,
@@ -32,12 +33,23 @@ import { useLocale } from "../../context/LocaleContext";
 import { formatCount } from "../../data/mockVibes";
 
 function VibeCard({ vibe }) {
-  const { toggleLike, toggleSave, toggleShare, addComment, isLiked, isSaved, hideVibe, increaseRecommendation } = useFeed();
+  const {
+    toggleLike,
+    toggleSave,
+    toggleRepost,
+    toggleShare,
+    addComment,
+    isLiked,
+    isSaved,
+    isReposted,
+  } = useFeed();
   const { openSeeThrough } = useSeeThrough();
   const { t } = useLocale();
-  const { user, media, caption, music, likes, comments, shares, saves, type } = vibe;
+  const { user, media, caption, music, likes, comments, shares, saves, reposts, type } = vibe;
   const liked = isLiked(vibe.id);
   const saved = isSaved(vibe.id);
+  const reposted = isReposted(vibe.id);
+
   const [expanded, setExpanded] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
@@ -45,9 +57,7 @@ function VibeCard({ vibe }) {
   const [menuClosing, setMenuClosing] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentCount, setCommentCount] = useState(comments);
-  const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [reportOpen, setReportOpen] = useState(false);
+  const [repostToast, setRepostToast] = useState(false);
   const menuRef = useRef(null);
 
   const demoComments = useMemo(
@@ -62,6 +72,14 @@ function VibeCard({ vibe }) {
     if (!commentText.trim()) return;
     setCommentCount((prev) => prev + 1);
     setCommentText("");
+  };
+
+  const handleRepost = () => {
+    toggleRepost(vibe.id);
+    if (!reposted) {
+      setRepostToast(true);
+      setTimeout(() => setRepostToast(false), 2200);
+    }
   };
 
   const closeMenu = () => {
@@ -111,25 +129,71 @@ function VibeCard({ vibe }) {
     <article className="vibe-card">
       <img src={media} alt="" className="vibe-card__media" />
 
+      {repostToast && (
+        <div className="vibe-card__repost-toast">
+          <Repeat size={14} />
+          <span>Reposted to your campus followers (+5× League PT)</span>
+        </div>
+      )}
+
       <div className="vibe-card__actions">
-        <button type="button" className={`vibe-card__action ${liked ? "active" : ""}`} onClick={() => toggleLike(vibe.id)}>
-          <Heart size={26} fill={liked ? "#ff4757" : "none"} color={liked ? "#ff4757" : "white"} />
+        <button
+          type="button"
+          className={`vibe-card__action ${liked ? "active" : ""}`}
+          onClick={() => toggleLike(vibe.id)}
+          title="Like (1× PT)"
+        >
+          <Heart size={24} fill={liked ? "#ff4757" : "none"} color={liked ? "#ff4757" : "white"} />
           <span>{formatCount(likes)}</span>
         </button>
-        <button type="button" className="vibe-card__action" onClick={() => { addComment(vibe.id); setCommentsOpen(true); }}>
-          <MessageCircle size={26} />
+
+        <button
+          type="button"
+          className="vibe-card__action"
+          onClick={() => { addComment(vibe.id); setCommentsOpen(true); }}
+          title="Comments"
+        >
+          <MessageCircle size={24} />
           <span>{formatCount(commentCount)}</span>
         </button>
-        <button type="button" className="vibe-card__action" onClick={() => { toggleShare(vibe.id); setShareOpen(true); }}>
-          <Share2 size={26} />
-          <span>{formatCount(shares)}</span>
+
+        <button
+          type="button"
+          className={`vibe-card__action ${reposted ? "reposted" : ""}`}
+          onClick={handleRepost}
+          title="Repost (5× League PT)"
+        >
+          <Repeat size={24} color={reposted ? "#2ed573" : "white"} />
+          <span>{formatCount(reposts || 0)}</span>
         </button>
-        <button type="button" className={`vibe-card__action ${saved ? "active" : ""}`} onClick={() => toggleSave(vibe.id)}>
-          <Bookmark size={26} fill={saved ? "#2d8cff" : "none"} color={saved ? "#2d8cff" : "white"} />
+
+        <button
+          type="button"
+          className={`vibe-card__action ${saved ? "active" : ""}`}
+          onClick={() => toggleSave(vibe.id)}
+          title="Save (5× League PT)"
+        >
+          <Bookmark size={24} fill={saved ? "#2d8cff" : "none"} color={saved ? "#2d8cff" : "white"} />
           <span>{formatCount(saves)}</span>
         </button>
-        <button type="button" className="vibe-card__action vibe-card__action--more" onClick={toggleMenu}>
-          <MoreHorizontal size={26} />
+
+        <button
+          type="button"
+          className="vibe-card__action"
+          onClick={() => { toggleShare(vibe.id); setShareOpen(true); }}
+          title="Share"
+        >
+          <Share2 size={24} />
+          <span>{formatCount(shares)}</span>
+        </button>
+
+        <button
+          type="button"
+          className="vibe-card__action vibe-card__action--more"
+          onClick={toggleMenu}
+          title="More options"
+        >
+          <MoreHorizontal size={24} />
         </button>
       </div>
 
@@ -232,15 +296,21 @@ function VibeCard({ vibe }) {
           <div>
             <div className="vibe-card__name">
               {user.name}
-              {user.verified && <BadgeCheck size={16} className="vibe-card__verified" />}
+              {(user.verified || user.isStudent) && (
+                <span title="Verified University Student">
+                  <BadgeCheck size={16} className="vibe-card__verified" />
+                </span>
+              )}
             </div>
             <div className="vibe-card__meta">
-              {user.university} • {user.department}
+              {user.university || "Uni Vibe Community"} • {user.department || "Campus"}
             </div>
           </div>
         </Link>
 
-        <p className="vibe-card__caption">{expanded ? caption : `${caption.slice(0, 90)}${caption.length > 90 ? "…" : ""}`}</p>
+        <p className="vibe-card__caption" onClick={() => setExpanded(!expanded)}>
+          {expanded ? caption : `${caption.slice(0, 90)}${caption.length > 90 ? "…" : ""}`}
+        </p>
 
         <div className="vibe-card__footer">
           <div className="vibe-card__music">
