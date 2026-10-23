@@ -1,10 +1,6 @@
 import { NavLink } from "react-router-dom";
-<<<<<<< HEAD
-import { Trophy, Megaphone, Plus, MessageCircle, User } from "lucide-react";
-=======
 import GlassPanel from "../GlassPanel/GlassPanel";
 import { Home, Trophy, Megaphone, Plus, MessageCircle, User } from "lucide-react";
->>>>>>> good
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../context/LocaleContext";
 import { useUpload } from "../../context/UploadContext";

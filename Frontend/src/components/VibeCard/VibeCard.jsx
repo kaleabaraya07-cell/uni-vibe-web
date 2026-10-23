@@ -33,9 +33,6 @@ import { useLocale } from "../../context/LocaleContext";
 import { formatCount } from "../../data/mockVibes";
 
 function VibeCard({ vibe }) {
-<<<<<<< HEAD
-  const { toggleLike, toggleSave, toggleShare, addComment, isLiked, isSaved, hideVibe, increaseRecommendation } = useFeed();
-=======
   const {
     toggleLike,
     toggleSave,
@@ -46,7 +43,6 @@ function VibeCard({ vibe }) {
     isSaved,
     isReposted,
   } = useFeed();
->>>>>>> good
   const { openSeeThrough } = useSeeThrough();
   const { t } = useLocale();
   const { user, media, caption, music, likes, comments, shares, saves, reposts, type } = vibe;
@@ -61,13 +57,7 @@ function VibeCard({ vibe }) {
   const [menuClosing, setMenuClosing] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [commentCount, setCommentCount] = useState(comments);
-<<<<<<< HEAD
-  const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [reportOpen, setReportOpen] = useState(false);
-=======
   const [repostToast, setRepostToast] = useState(false);
->>>>>>> good
   const menuRef = useRef(null);
 
   const demoComments = useMemo(
