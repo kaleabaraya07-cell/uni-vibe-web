@@ -78,6 +78,21 @@
   animation: fadeInDown 0.25s ease;
 }
 
+.vibe-card__action-notice {
+  position: absolute;
+  top: 16px;
+  right: 70px;
+  z-index: 10;
+  max-width: min(280px, calc(100% - 90px));
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 12px;
+  background: rgba(13,22,38,0.92);
+  color: #fff;
+  font-size: 12px;
+}
+
 @keyframes fadeInDown {
   from {
     opacity: 0;

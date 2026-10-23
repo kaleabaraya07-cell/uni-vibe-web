@@ -1,81 +1,129 @@
-import { mockVibes, getVibeById as getVById } from "../data/mockVibes";
-import { mockStories } from "../data/mockStories";
+import apiClient, { mediaUrl } from "./apiClient";
 
-/**
- * Posts, Vibes & Stories Service
- */
+export function mapApiPost(post) {
+  return {
+    id: post.id,
+    type: post.media_type,
+    media: mediaUrl(post.media_url),
+    caption: post.caption,
+    music: "Original Audio",
+    category: post.category,
+    location: post.university?.name || post.university_id,
+    hashtags: post.hashtags || [],
+    likes: post.likes,
+    comments: post.comments,
+    shares: 0,
+    reposts: post.reposts,
+    saves: post.saves,
+    views: post.views,
+    validViews: post.views,
+    season: String(post.season_year),
+    universityId: post.university_id,
+    user: {
+      id: post.author.id,
+      name: post.author.display_name,
+      username: `@${post.author.username}`,
+      avatar: "",
+      isStudent: post.author.is_student,
+      verified: post.author.verification_status === "verified",
+      university: post.author.university_id || "Uni Vibe Community",
+      department: "",
+    },
+    viewerState: {
+      liked: post.liked_by_me,
+      saved: post.saved_by_me,
+      reposted: post.reposted_by_me,
+    },
+    createdAt: post.created_at,
+  };
+}
+
 export const postService = {
-  async getFeedPosts({ page = 1, limit = 10, category = null } = {}) {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    let posts = [...mockVibes];
-    if (category && category !== "All") {
-      posts = posts.filter((p) => p.category?.toLowerCase() === category.toLowerCase());
-    }
-    const startIndex = (page - 1) * limit;
+  async getFeedPosts({ page = 1, limit = 20 } = {}) {
+    const result = await apiClient(`/feed?page=${page}&limit=${limit}`);
     return {
-      posts: posts.slice(startIndex, startIndex + limit),
-      hasMore: startIndex + limit < posts.length,
-      total: posts.length,
+      posts: result.data.map(mapApiPost),
+      hasMore: result.data.length === limit,
+      total: null,
     };
   },
 
   async getPostById(id) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return getVById(id) || null;
+    const post = await apiClient(`/posts/${encodeURIComponent(id)}`);
+    return mapApiPost(post);
   },
 
-  async createPost(postData, currentUser) {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    // Core business rule check: Only verified university students can create posts
-    if (!currentUser?.isStudent || currentUser?.verificationStatus !== "verified") {
-      throw new Error("Only verified university students can create posts on Uni Vibe.");
-    }
+  async createPost({ caption, file, category, hashtags }) {
+    const body = new FormData();
+    body.set("caption", caption);
+    body.set("category", category || "Campus life");
+    body.set("hashtags", hashtags || "");
+    if (file) body.set("media", file);
+    return mapApiPost(await apiClient("/posts", { method: "POST", body }));
+  },
 
-    const newPost = {
-      id: `v_${Date.now()}`,
-      ...postData,
-      user: currentUser,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      reposts: 0,
-      saves: 0,
-      views: 0,
-      validViews: 0,
-      createdAt: new Date().toISOString(),
-      season: "2026",
+  async getSavedPosts() {
+    const result = await apiClient("/posts/saved");
+    return result.map(mapApiPost);
+  },
+
+  async getLikedPosts() {
+    const result = await apiClient("/posts/liked");
+    return result.map(mapApiPost);
+  },
+
+  async getUserPosts(userId, { page = 1, limit = 20 } = {}) {
+    const result = await apiClient(
+      `/feed?user_id=${encodeURIComponent(userId)}&page=${page}&limit=${limit}`
+    );
+    return {
+      posts: result.data.map(mapApiPost),
+      hasMore: result.data.length === limit,
     };
-
-    mockVibes.unshift(newPost);
-    return newPost;
   },
 
-  async toggleLike(postId) {
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    const post = mockVibes.find((p) => p.id === postId);
-    if (!post) throw new Error("Post not found");
-    return { success: true, likes: post.likes + 1 };
+  async getUniversityPosts(universityId, { page = 1, limit = 20 } = {}) {
+    const result = await apiClient(
+      `/feed?university_id=${encodeURIComponent(universityId)}&page=${page}&limit=${limit}`
+    );
+    return {
+      posts: result.data.map(mapApiPost),
+      hasMore: result.data.length === limit,
+    };
   },
 
-  async repost(postId) {
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    const post = mockVibes.find((p) => p.id === postId);
-    if (!post) throw new Error("Post not found");
-    post.reposts = (post.reposts || 0) + 1;
-    return { success: true, reposts: post.reposts };
+  toggleLike(postId) {
+    return apiClient(`/posts/${encodeURIComponent(postId)}/likes`, { method: "POST" });
   },
 
-  async toggleSave(postId) {
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    const post = mockVibes.find((p) => p.id === postId);
-    if (!post) throw new Error("Post not found");
-    post.saves = (post.saves || 0) + 1;
-    return { success: true, saves: post.saves };
+  toggleSave(postId) {
+    return apiClient(`/posts/${encodeURIComponent(postId)}/saves`, { method: "POST" });
   },
 
-  async getStories() {
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    return [...mockStories];
+  toggleRepost(postId) {
+    return apiClient(`/posts/${encodeURIComponent(postId)}/reposts`, { method: "POST" });
+  },
+
+  addComment(postId, body) {
+    return apiClient(`/posts/${encodeURIComponent(postId)}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    });
+  },
+
+  async getComments(postId) {
+    return apiClient(`/posts/${encodeURIComponent(postId)}/comments`);
+  },
+
+  startView(postId) {
+    return apiClient(`/posts/${encodeURIComponent(postId)}/views/start`, { method: "POST" });
+  },
+
+  completeView(postId, viewSessionId) {
+    return apiClient(
+      `/posts/${encodeURIComponent(postId)}/views/${encodeURIComponent(viewSessionId)}/complete`,
+      { method: "POST" }
+    );
   },
 };
 

@@ -1,19 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLocale } from "../../context/LocaleContext";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import TabBar from "../../components/ui/TabBar/TabBar";
-import { mockVibes } from "../../data/mockVibes";
-import { mockUsers } from "../../data/mockUsers";
-import { mockUniversities, mockClubs } from "../../data/mockUniversities";
-import { mockEvents } from "../../data/mockEvents";
+import searchService from "../../services/searchService";
 import "./Search.css";
+
+const emptyResults = { vibes: [], people: [], universities: [] };
 
 function Search() {
   const { t } = useLocale();
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState("vibes");
-  const q = query.toLowerCase();
+  const [results, setResults] = useState(emptyResults);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const tabs = [
     { id: "vibes", label: "Vibes" },
@@ -23,42 +24,67 @@ function Search() {
     { id: "events", label: "Events" },
   ];
 
-  const results = {
-    vibes: mockVibes.filter((v) => v.caption.toLowerCase().includes(q)),
-    people: mockUsers.filter((u) => u.name.toLowerCase().includes(q) || u.username.includes(q)),
-    universities: mockUniversities.filter((u) => u.name.toLowerCase().includes(q)),
-    clubs: mockClubs.filter((c) => c.name.toLowerCase().includes(q)),
-    events: mockEvents.filter((e) => e.title.toLowerCase().includes(q)),
-  };
+  useEffect(() => {
+    const cleaned = query.trim();
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      if (!cleaned) {
+        setResults(emptyResults);
+        setError("");
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setError("");
+      searchService.search(cleaned, 20, { signal: controller.signal })
+        .then((nextResults) => setResults(nextResults))
+        .catch((requestError) => {
+          if (!controller.signal.aborted) {
+            setError(requestError.message || "Unable to search Uni Vibe.");
+          }
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setLoading(false);
+        });
+    }, cleaned ? 250 : 0);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query]);
+
+  const unavailable = tab === "clubs" || tab === "events";
+  const tabResults = unavailable ? [] : results[tab];
 
   return (
     <div className="search-page">
       <h1>{t("common.search")}</h1>
       <SearchBar value={query} onChange={setQuery} placeholder={t("search.placeholder")} />
-      <div className="search-page__highlights">
-        <span>Trending</span>
-        <span>#CampusLife</span>
-        <span>#Hackathon</span>
-        <span>#Basketball</span>
-      </div>
       <TabBar tabs={tabs} activeId={tab} onChange={setTab} />
+      {error && <p role="alert">{error}</p>}
+      {loading && <p role="status">Searching…</p>}
       <div className="search-results">
-        {tab === "vibes" && results.vibes.map((v) => (
-          <Link key={v.id} to="/feed" className="search-result">{v.caption}</Link>
+        {!loading && tab === "vibes" && results.vibes.map((vibe) => (
+          <Link key={vibe.id} to={`/feed#post-${encodeURIComponent(vibe.id)}`} className="search-result">
+            {vibe.caption}
+          </Link>
         ))}
-        {tab === "people" && results.people.map((u) => (
-          <Link key={u.id} to={`/profile/${u.id}`} className="search-result">{u.name} {u.username}</Link>
+        {!loading && tab === "people" && results.people.map((person) => (
+          <Link key={person.id} to={`/profile/${person.id}`} className="search-result">
+            {person.name} {person.username}
+          </Link>
         ))}
-        {tab === "universities" && results.universities.map((u) => (
-          <Link key={u.id} to={`/university/${u.id}`} className="search-result">{u.name}</Link>
+        {!loading && tab === "universities" && results.universities.map((university) => (
+          <Link key={university.id} to={`/university/${university.id}`} className="search-result">
+            {university.name}
+          </Link>
         ))}
-        {tab === "clubs" && results.clubs.map((c) => (
-          <Link key={c.id} to={`/club/${c.id}`} className="search-result">{c.name}</Link>
-        ))}
-        {tab === "events" && results.events.map((e) => (
-          <Link key={e.id} to={`/event/${e.id}`} className="search-result">{e.title}</Link>
-        ))}
-        {results[tab].length === 0 && <p className="search-empty">No results yet — try another keyword.</p>}
+        {!loading && unavailable && (
+          <p className="search-empty">Search for clubs and events will be available when those services are implemented.</p>
+        )}
+        {!loading && !unavailable && query.trim() && tabResults.length === 0 && (
+          <p className="search-empty">No results yet — try another keyword.</p>
+        )}
       </div>
     </div>
   );

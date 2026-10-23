@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { getUserById, currentUser } from "../../data/mockUsers";
-import { mockVibes } from "../../data/mockVibes";
 import { useAuth } from "../../context/useAuth";
-import { useFeed } from "../../context/FeedContext";
+import { profileService } from "../../services/profileService";
+import rankingService from "../../services/rankingService";
 import ProfileHeader from "../../components/ProfileHeader/ProfileHeader";
 import GlassPanel from "../../components/GlassPanel/GlassPanel";
 import Modal from "../../components/ui/Modal/Modal";
@@ -24,11 +23,14 @@ import "./Profile.css";
 
 function Profile() {
   const { id } = useParams();
-  const { user: authUser } = useAuth();
-  const { getSavedVibes } = useFeed();
-
-  // Find user or default to currentUser
-  const user = getUserById(id) || (id === authUser?.id ? authUser : currentUser);
+  const { user: authUser, updateProfile } = useAuth();
+  const [user, setUser] = useState(null);
+  const [vibes, setVibes] = useState([]);
+  const [savedVibes, setSavedVibes] = useState([]);
+  const [likedVibes, setLikedVibes] = useState([]);
+  const [leagueInfo, setLeagueInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [profileError, setProfileError] = useState("");
   const isOwnProfile = authUser?.id === user?.id;
 
   const [following, setFollowing] = useState(false);
@@ -36,15 +38,45 @@ function Profile() {
 
   // Edit Profile Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editName, setEditName] = useState(user.name);
-  const [editBio, setEditBio] = useState(user.bio);
-  const [editDepartment, setEditDepartment] = useState(user.department);
-  const [editYear, setEditYear] = useState(user.year || "3rd Year");
+  const [editName, setEditName] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [editDepartment, setEditDepartment] = useState("");
 
-  const vibes = mockVibes.filter((v) => v.user.id === user.id);
-  const savedVibes = getSavedVibes();
-  const likedVibes = mockVibes.slice(1, 4); // mock liked
   const mediaVibes = vibes.filter((v) => v.type === "video" || v.type === "image");
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      profileService.getUserProfile(id),
+      profileService.getUserPosts(id),
+      authUser?.id === id ? profileService.getUserSavedPosts() : Promise.resolve([]),
+      authUser?.id === id ? profileService.getUserLikedPosts() : Promise.resolve([]),
+    ])
+      .then(async ([profile, posts, savedPosts, likedPosts]) => {
+        const league = profile.isStudent
+          ? await rankingService.getUserLeagueInfo(profile.id)
+          : null;
+        if (!active) return;
+        setProfileError("");
+        setUser(profile);
+        setVibes(posts);
+        setSavedVibes(savedPosts);
+        setLikedVibes(likedPosts);
+        setLeagueInfo(league);
+        setEditName(profile.name);
+        setEditBio(profile.bio);
+        setEditDepartment(profile.department || "");
+      })
+      .catch((error) => {
+        if (active) setProfileError(error.message || "Unable to load this profile.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [authUser?.id, id]);
 
   const displayedVibes =
     activeTab === "saved"
@@ -55,19 +87,29 @@ function Profile() {
           ? mediaVibes
           : vibes;
 
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
-    user.name = editName;
-    user.bio = editBio;
-    user.department = editDepartment;
-    user.year = editYear;
-    setIsEditModalOpen(false);
+    setProfileError("");
+    try {
+      const updatedUser = await updateProfile({
+        name: editName,
+        bio: editBio,
+        department: editDepartment,
+      });
+      setUser(updatedUser);
+      setIsEditModalOpen(false);
+    } catch (error) {
+      setProfileError(error.message || "Unable to update your profile.");
+    }
   };
 
-  if (!user) return <div className="profile-page"><p>User not found</p></div>;
+  if (profileError && (!user || user.id !== id)) return <div className="profile-page"><p role="alert">{profileError}</p></div>;
+  if (loading || user?.id !== id) return <div className="profile-page"><p role="status">Loading profile…</p></div>;
+  if (!user) return <div className="profile-page"><p>User not found.</p></div>;
 
   return (
     <div className="profile-page">
+      {profileError && <p role="alert">{profileError}</p>}
       {/* Cover Image */}
       <div
         className="profile-page__cover"
@@ -90,7 +132,7 @@ function Profile() {
           <div className="league-card-header">
             <div className="league-card-title">
               <Trophy size={18} className="trophy-icon" />
-              <h4>Season 2026 League Contribution</h4>
+              <h4>Season {leagueInfo?.seasonYear || new Date().getUTCFullYear()} League Contribution</h4>
             </div>
             <Link to="/rankings" className="league-link">
               League Standings <ChevronRight size={14} />
@@ -100,20 +142,24 @@ function Profile() {
           <div className="league-card-grid">
             <div className="league-stat-box">
               <span className="stat-label">Personal PT</span>
-              <span className="stat-value">{user.leaguePT || 14.8} PT</span>
+              <span className="stat-value">{leagueInfo?.points.toFixed(2) || "0.00"} PT</span>
               <span className="stat-sub">From {vibes.length} season vibes</span>
             </div>
 
             <div className="league-stat-box">
               <span className="stat-label">Rank in {user.university || "EPSU"}</span>
-              <span className="stat-value">#2</span>
-              <span className="stat-sub">Top 1% contributor</span>
+              <span className="stat-value">{leagueInfo?.universityRank ? `#${leagueInfo.universityRank}` : "—"}</span>
+              <span className="stat-sub">{leagueInfo?.universityPoints.toFixed(2) || "0.00"} university PT</span>
             </div>
 
             <div className="league-stat-box">
               <span className="stat-label">University Impact</span>
-              <span className="stat-value">2.3%</span>
-              <span className="stat-sub">Of total campus PT</span>
+              <span className="stat-value">
+                {leagueInfo?.universityPoints
+                  ? `${((leagueInfo.points / leagueInfo.universityPoints) * 100).toFixed(1)}%`
+                  : "0%"}
+              </span>
+              <span className="stat-sub">Of university PT</span>
             </div>
           </div>
         </GlassPanel>
@@ -220,12 +266,6 @@ function Profile() {
                 label="Department"
                 value={editDepartment}
                 onChange={(e) => setEditDepartment(e.target.value)}
-              />
-              <Input
-                label="Academic Year"
-                value={editYear}
-                onChange={(e) => setEditYear(e.target.value)}
-                placeholder="e.g. 3rd Year"
               />
             </>
           )}

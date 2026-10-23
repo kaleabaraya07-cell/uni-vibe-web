@@ -1,44 +1,61 @@
-import {
-  CURRENT_SEASON,
-  calculatePostPT,
-  mockLeagueLeaderboard,
-  mockLeagueHighlights,
-  mockTopContributors,
-  mockUserUniversityLeagueInfo,
-} from "../data/mockRankings";
+import apiClient from "./apiClient";
+import universityService from "./universityService";
 
-/**
- * Uni Vibe League & Ranking Service
- */
 export const rankingService = {
-  async getSeasonInfo() {
-    await new Promise((resolve) => setTimeout(resolve, 80));
-    return CURRENT_SEASON;
+  getSeasonInfo() {
+    const year = new Date().getUTCFullYear();
+    return Promise.resolve({ year, name: `Season ${year}` });
   },
 
-  async getLeaderboard() {
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    return [...mockLeagueLeaderboard];
+  async getLeaderboard(seasonYear = new Date().getUTCFullYear()) {
+    const [entries, universities] = await Promise.all([
+      apiClient(`/rankings/universities?season_year=${seasonYear}`),
+      universityService.getUniversities(),
+    ]);
+    const details = new Map(universities.map((university) => [university.id, university]));
+    return entries.map((entry, index) => {
+      const university = details.get(entry.university_id);
+      return {
+        universityId: entry.university_id,
+        name: entry.name,
+        shortName: university?.shortName || entry.university_id,
+        location: university?.location || "",
+        seasonPT: Number(entry.points),
+        rank: index + 1,
+      };
+    });
   },
 
-  async getLeagueHighlights() {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return { ...mockLeagueHighlights };
+  async getTopContributors(seasonYear = new Date().getUTCFullYear()) {
+    const [contributors, universities] = await Promise.all([
+      apiClient(`/rankings/students?season_year=${seasonYear}&limit=20`),
+      universityService.getUniversities(),
+    ]);
+    const names = new Map(universities.map((university) => [university.id, university.name]));
+    return contributors.map((contributor, index) => ({
+      rank: index + 1,
+      user: {
+        id: contributor.user_id,
+        name: contributor.display_name,
+        username: "",
+        university: names.get(contributor.university_id) || "Uni Vibe Community",
+      },
+      studentPT: Number(contributor.points),
+    }));
   },
 
-  async getTopContributors() {
-    await new Promise((resolve) => setTimeout(resolve, 120));
-    return [...mockTopContributors];
-  },
-
-  async getUserLeagueInfo(userId) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    if (!userId) throw new Error("User ID is required");
-    return { ...mockUserUniversityLeagueInfo };
-  },
-
-  calculatePT(metrics) {
-    return calculatePostPT(metrics);
+  getUserLeagueInfo(userId, seasonYear = new Date().getUTCFullYear()) {
+    return apiClient(
+      `/rankings/students/${encodeURIComponent(userId)}?season_year=${seasonYear}`
+    ).then((entry) => ({
+      userId: entry.user_id,
+      seasonYear: entry.season_year,
+      points: Number(entry.points),
+      rank: entry.rank,
+      universityId: entry.university_id,
+      universityRank: entry.university_rank,
+      universityPoints: Number(entry.university_points),
+    }));
   },
 };
 

@@ -1,56 +1,51 @@
-import {
-  mockUniversities,
-  mockClubs,
-  getUniversityById as getUniById,
-  getDepartmentById as getDeptById,
-  getClubById as getClbById,
-  mockUniversityRequests,
-  getDepartmentsByUniversity as getDeptsByUni,
-} from "../data/mockUniversities";
+import apiClient from "./apiClient";
 
-/**
- * University, Department & Club Service
- */
+export function mapUniversity(university) {
+  return {
+    ...university,
+    shortName: university.short_name,
+    population: null,
+    cover: "",
+    logo: "",
+  };
+}
+
 export const universityService = {
   async getUniversities() {
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    return [...mockUniversities];
+    const data = await apiClient("/universities?limit=200");
+    return data.map(mapUniversity);
   },
 
   async getUniversityById(id) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return getUniById(id) || null;
+    return mapUniversity(await apiClient(`/universities/${encodeURIComponent(id)}`));
   },
 
-  async getDepartmentsByUniversity(universityId) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return getDeptsByUni(universityId);
+  async getDepartmentsByUniversity() {
+    return [];
   },
 
-  async getDepartmentById(id) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return getDeptById(id) || null;
+  async getDepartmentById() {
+    return null;
   },
 
-  async getClubsByUniversity(universityId) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return mockClubs.filter((c) => c.universityId === universityId);
+  async getClubsByUniversity() {
+    return [];
   },
 
-  async getClubById(id) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return getClbById(id) || null;
+  async getClubById() {
+    return null;
   },
 
   async submitUniversityRequest(data) {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const request = {
-      id: `req_${Date.now()}`,
-      ...data,
-      status: "pending",
-      submittedAt: new Date().toISOString(),
-    };
-    mockUniversityRequests.push(request);
+    const request = await apiClient("/universities/requests", {
+      method: "POST",
+      body: JSON.stringify({
+        name: data.name,
+        location: data.location,
+        website: data.website || null,
+        applicant_email: data.applicantEmail || data.applicant_email,
+      }),
+    });
     return { success: true, request };
   },
 };

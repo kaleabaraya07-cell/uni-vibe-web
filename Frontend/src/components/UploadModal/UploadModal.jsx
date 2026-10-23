@@ -7,7 +7,7 @@ import { useLocale } from "../../context/LocaleContext";
 import Modal from "../ui/Modal/Modal";
 import Input from "../ui/Input/Input";
 import Button from "../ui/Button/Button";
-import { mockUniversities } from "../../data/mockUniversities";
+import universityService from "../../services/universityService";
 import {
   Camera,
   Video,
@@ -36,16 +36,33 @@ function UploadModal() {
   const [step, setStep] = useState(1);
   const [caption, setCaption] = useState("");
   const [category, setCategory] = useState(categories[0]);
+  const [hashtags, setHashtags] = useState("");
   const [mediaType, setMediaType] = useState("Photo");
   const [preview, setPreview] = useState("");
+  const [mediaFile, setMediaFile] = useState(null);
   const [mediaError, setMediaError] = useState("");
+  const [publishError, setPublishError] = useState("");
+  const [universities, setUniversities] = useState([]);
   const [publishing, setPublishing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [selectedUniId, setSelectedUniId] = useState(user?.universityId || "uni1");
   const previewObjectUrl = useRef(null);
   const publishTimer = useRef(null);
 
   const isVerifiedStudent = Boolean(user?.isStudent && (user?.verified || user?.verificationStatus === "verified"));
+
+  useEffect(() => {
+    let active = true;
+    universityService.getUniversities()
+      .then((items) => {
+        if (active) setUniversities(items);
+      })
+      .catch((error) => {
+        if (active) setPublishError(error.message || "Unable to load the university directory.");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(
     () => () => {
@@ -62,7 +79,7 @@ function UploadModal() {
     return "Publish";
   }, [step]);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!caption.trim() || !user || !isVerifiedStudent) return;
     if (!previewObjectUrl.current) {
       setMediaError(mediaType === "Video"
@@ -71,33 +88,9 @@ function UploadModal() {
       return;
     }
     setPublishing(true);
-
-    const selectedUni = mockUniversities.find((u) => u.id === selectedUniId) || mockUniversities[0];
-
-    publishTimer.current = window.setTimeout(() => {
-      addVibe({
-        id: `v${Date.now()}`,
-        type: mediaType === "Video" ? "video" : "image",
-        user,
-        media: preview,
-        caption,
-        music: "Original Audio",
-        category,
-        location: selectedUni.name,
-        hashtags: ["#UVit", `#${selectedUni.shortName}`, "#CampusLife"],
-        likes: 0,
-        comments: 0,
-        shares: 0,
-        reposts: 0,
-        saves: 0,
-        views: 0,
-        validViews: 0,
-        season: "2026",
-        universityId: selectedUni.id,
-        clubId: null,
-        eventId: null,
-      });
-      previewObjectUrl.current = null;
+    setPublishError("");
+    try {
+      await addVibe({ caption: caption.trim(), file: mediaFile, category, hashtags });
       setCaption("");
       setStep(4);
       setPublishing(false);
@@ -106,7 +99,10 @@ function UploadModal() {
         closeModal();
         navigate("/feed");
       }, 900);
-    }, 800);
+    } catch (error) {
+      setPublishError(error.message || "Unable to publish this vibe.");
+      setPublishing(false);
+    }
   };
 
   const closeModal = () => {
@@ -121,10 +117,13 @@ function UploadModal() {
     }
     setStep(1);
     setCaption("");
+    setMediaFile(null);
     setCategory(categories[0]);
+    setHashtags("");
     setMediaType("Photo");
     setPreview("");
     setMediaError("");
+    setPublishError("");
     setDragActive(false);
     closeUpload();
   };
@@ -139,6 +138,7 @@ function UploadModal() {
     const objectUrl = URL.createObjectURL(file);
     previewObjectUrl.current = objectUrl;
     setPreview(objectUrl);
+    setMediaFile(file);
     setMediaType(file.type.startsWith("video/") ? "Video" : "Photo");
     setMediaError("");
     setStep(2);
@@ -148,6 +148,7 @@ function UploadModal() {
     <Modal open={open} onClose={closeModal} title={t("upload.title") || "Create New Vibe"}>
       <div className="upload-modal">
         {mediaError && <p className="upload-modal__error" role="alert">{mediaError}</p>}
+        {publishError && <p className="upload-modal__error" role="alert">{publishError}</p>}
         {/* Core Verification Gate Check */}
         {!isVerifiedStudent ? (
           <div className="upload-modal__verification-gate">
@@ -250,19 +251,14 @@ function UploadModal() {
               <>
                 <Input label={t("upload.caption") || "Caption"} value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="What’s the vibe?" />
                 <label className="upload-modal__label">Hashtags</label>
-                <input className="upload-modal__select" placeholder="#CampusLife #EPSU #UVit" />
-                <label className="upload-modal__label">Representing University</label>
-                <select
+                <input
                   className="upload-modal__select"
-                  value={selectedUniId}
-                  onChange={(e) => setSelectedUniId(e.target.value)}
-                >
-                  {mockUniversities.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} ({u.shortName})
-                    </option>
-                  ))}
-                </select>
+                  value={hashtags}
+                  onChange={(e) => setHashtags(e.target.value)}
+                  placeholder="#CampusLife #EPSU #UVit"
+                />
+                <label className="upload-modal__label">Representing University</label>
+                <p>{universities.find((item) => item.id === user.universityId)?.name || user.universityId}</p>
                 <label className="upload-modal__label">{t("upload.category") || "Category"}</label>
                 <select className="upload-modal__select" value={category} onChange={(e) => setCategory(e.target.value)}>
                   {categories.map((c) => <option key={c} value={c}>{c}</option>)}

@@ -1,15 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../context/LocaleContext";
+import universityService from "../../services/universityService";
+import verificationService from "../../services/verificationService";
 import Button from "../../components/ui/Button/Button";
 import Input from "../../components/ui/Input/Input";
 import Modal from "../../components/ui/Modal/Modal";
-import {
-  mockUniversities,
-  getDepartmentsByUniversity,
-  mockUniversityRequests,
-} from "../../data/mockUniversities";
 import {
   GraduationCap,
   Compass,
@@ -28,9 +25,13 @@ function SignUp() {
   const [password, setPassword] = useState("");
 
   const [isStudent, setIsStudent] = useState(true);
-  const [selectedUniId, setSelectedUniId] = useState(mockUniversities[0]?.id || "uni1");
-  const [selectedDeptId, setSelectedDeptId] = useState("");
+  const [universities, setUniversities] = useState([]);
+  const [selectedUniId, setSelectedUniId] = useState("");
   const [customDept, setCustomDept] = useState("");
+  const [universityEmail, setUniversityEmail] = useState("");
+  const [requestError, setRequestError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [accountCreated, setAccountCreated] = useState(false);
 
   // University Request Modal State
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
@@ -43,7 +44,22 @@ function SignUp() {
   const { t } = useLocale();
   const navigate = useNavigate();
 
-  const currentDepartments = getDepartmentsByUniversity(selectedUniId);
+  useEffect(() => {
+    let active = true;
+    universityService
+      .getUniversities()
+      .then((items) => {
+        if (!active) return;
+        setUniversities(items);
+        setSelectedUniId(items[0]?.id || "");
+      })
+      .catch((error) => {
+        if (active) setRequestError(error.message || "Could not load universities.");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleNextStep = (e) => {
     e.preventDefault();
@@ -51,49 +67,74 @@ function SignUp() {
     setStep(2);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const departmentName = customDept || currentDepartments.find((d) => d.id === selectedDeptId)?.name || "General Studies";
+    setSubmitting(true);
+    setRequestError("");
+    const departmentName = customDept.trim();
+    let accountWasCreated = false;
 
-    signup({
-      name,
-      username,
-      email,
-      password,
-      isStudent,
-      universityId: isStudent ? selectedUniId : null,
-      departmentId: isStudent ? selectedDeptId : null,
-      departmentName: isStudent ? departmentName : null,
-    });
-
-    navigate("/", { replace: true });
+    try {
+      await signup({
+        name,
+        username,
+        email,
+        password,
+        isStudent,
+        universityId: isStudent ? selectedUniId : null,
+        departmentName: isStudent ? departmentName : null,
+      });
+      accountWasCreated = true;
+      setAccountCreated(true);
+      if (isStudent) {
+        await verificationService.submitRequest({ universityEmail });
+      }
+      navigate("/", { replace: true });
+    } catch (error) {
+      setRequestError(accountWasCreated
+        ? `Your account was created, but the verification request was not submitted: ${error.message || "server error"}`
+        : error.message || "Unable to complete sign up.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleSocial = () => {
-    socialLogin();
-    navigate("/", { replace: true });
+  const retryVerification = async () => {
+    setSubmitting(true);
+    setRequestError("");
+    try {
+      await verificationService.submitRequest({ universityEmail });
+      navigate("/", { replace: true });
+    } catch (error) {
+      setRequestError(`Verification request was not submitted: ${error.message || "server error"}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleUniversityRequest = (e) => {
+  const handleSocial = async () => {
+    try {
+      await socialLogin();
+      navigate("/", { replace: true });
+    } catch (error) {
+      setRequestError(error.message || "External sign-in is not configured yet.");
+    }
+  };
+
+  const handleUniversityRequest = async (e) => {
     e.preventDefault();
-    if (!reqUniName) return;
-    mockUniversityRequests.push({
-      id: `req_${Date.now()}`,
-      name: reqUniName,
-      location: reqUniLocation,
-      website: reqUniWebsite,
-      applicantEmail: email,
-      status: "pending",
-      submittedAt: new Date().toISOString(),
-    });
-    setReqSubmitted(true);
-    setTimeout(() => {
-      setReqSubmitted(false);
-      setIsRequestModalOpen(false);
-      setReqUniName("");
-      setReqUniLocation("");
-      setReqUniWebsite("");
-    }, 1800);
+    setRequestError("");
+    try {
+      await universityService.submitUniversityRequest({
+        name: reqUniName,
+        location: reqUniLocation,
+        website: reqUniWebsite,
+        applicantEmail: email,
+      });
+      setReqSubmitted(true);
+    } catch (error) {
+      setRequestError(error.message || "Unable to submit your university request.");
+    }
   };
 
   return (
@@ -111,7 +152,17 @@ function SignUp() {
         </div>
       </div>
 
-      {step === 1 && (
+      {accountCreated ? (
+        <div className="signup-form">
+          <p className="signup-notice" role="status">
+            Your account was created. Submit the university verification request to continue.
+          </p>
+          {requestError && <p className="login__error" role="alert">{requestError}</p>}
+          <Button type="button" variant="primary" className="signup-submit" disabled={submitting} onClick={retryVerification}>
+            {submitting ? "Submitting request…" : "Retry verification request"}
+          </Button>
+        </div>
+      ) : step === 1 && (
         <form className="signup-form" onSubmit={handleNextStep}>
           <Input
             label={t("auth.name")}
@@ -141,6 +192,7 @@ function SignUp() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
+            minLength={12}
             required
           />
 
@@ -150,7 +202,7 @@ function SignUp() {
 
           <p className="login__divider">{t("auth.orContinue")}</p>
           <div className="login__social">
-            <Button variant="social" onClick={handleSocial}>
+            <Button type="button" variant="social" onClick={handleSocial}>
               {t("auth.google")}
             </Button>
           </div>
@@ -195,13 +247,11 @@ function SignUp() {
                 <select
                   className="signup-select"
                   value={selectedUniId}
-                  onChange={(e) => {
-                    setSelectedUniId(e.target.value);
-                    setSelectedDeptId("");
-                  }}
+                  onChange={(e) => setSelectedUniId(e.target.value)}
                   required
+                  disabled={universities.length === 0}
                 >
-                  {mockUniversities.map((uni) => (
+                  {universities.map((uni) => (
                     <option key={uni.id} value={uni.id}>
                       {uni.name} ({uni.shortName})
                     </option>
@@ -217,34 +267,26 @@ function SignUp() {
               </div>
 
               <div className="input-group">
-                <label className="signup-label">Department / Field of Study</label>
-                {currentDepartments.length > 0 ? (
-                  <select
-                    className="signup-select"
-                    value={selectedDeptId}
-                    onChange={(e) => setSelectedDeptId(e.target.value)}
-                  >
-                    <option value="">Select Department (or enter below)</option>
-                    {currentDepartments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                ) : null}
-
                 <Input
-                  label="Or enter custom department"
+                  label="Department / Field of Study"
                   value={customDept}
                   onChange={(e) => setCustomDept(e.target.value)}
                   placeholder="e.g. Biomedical Engineering"
+                />
+                <Input
+                  label="University email for verification"
+                  type="email"
+                  value={universityEmail}
+                  onChange={(e) => setUniversityEmail(e.target.value)}
+                  placeholder="you@university.edu"
+                  required
                 />
               </div>
 
               <div className="signup-notice">
                 <CheckCircle2 size={16} className="notice-icon" />
                 <span>
-                  University student accounts get verified status to create posts and contribute to university League PT.
+                  Student accounts remain pending until an administrator approves their university verification request.
                 </span>
               </div>
             </div>
@@ -266,12 +308,14 @@ function SignUp() {
             >
               <ArrowLeft size={16} /> Back
             </Button>
-            <Button type="submit" variant="primary" className="signup-submit">
-              Complete Sign Up
+            <Button type="submit" variant="primary" className="signup-submit" disabled={submitting || (isStudent && universities.length === 0)}>
+              {submitting ? "Creating account…" : "Complete Sign Up"}
             </Button>
           </div>
         </form>
       )}
+
+      {requestError && <p className="login__error" role="alert">{requestError}</p>}
 
       <p className="login__switch">
         {t("auth.hasAccount")}{" "}

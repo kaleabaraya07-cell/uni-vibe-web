@@ -7,38 +7,40 @@ import Input from "../../components/ui/Input/Input";
 import "./Login.css";
 
 function Login() {
-  const [email, setEmail] = useState("demo@univibe.com");
-  const [password, setPassword] = useState("demo123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
-  const [forgotSent, setForgotSent] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const { login, socialLogin } = useAuth();
+  const { login, socialLogin, authError, loading } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = login(email, password, rememberMe);
-    if (result.ok) navigate(from, { replace: true });
-    else setError(t("auth.invalid") || "Invalid email or password");
+    setSubmitting(true);
+    setError("");
+    try {
+      await login(email, password, rememberMe);
+      navigate(from, { replace: true });
+    } catch (loginError) {
+      setError(loginError.message || t("auth.invalid") || "Unable to sign in.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleSocial = () => {
-    socialLogin();
-    navigate(from, { replace: true });
-  };
-
-  const handleForgotSubmit = (e) => {
-    e.preventDefault();
-    setForgotSent(true);
-    setTimeout(() => {
-      setShowForgot(false);
-      setForgotSent(false);
-    }, 2000);
+  const handleSocial = async () => {
+    try {
+      await socialLogin();
+      navigate(from, { replace: true });
+    } catch (loginError) {
+      setError(loginError.message || "External sign-in is not configured yet.");
+    }
   };
 
   return (
@@ -81,35 +83,21 @@ function Login() {
             </button>
           </div>
 
-          {error && <p className="login__error">{error}</p>}
+          {(error || authError) && <p className="login__error" role="alert">{error || authError}</p>}
 
-          <Button type="submit" variant="primary" className="login__submit">
-            {t("auth.login")}
+          <Button type="submit" variant="primary" className="login__submit" disabled={submitting || loading}>
+            {submitting ? "Signing in…" : t("auth.login")}
           </Button>
 
           <div className="login__demo-badge">
-            <span>Demo: <strong>demo@univibe.com</strong> • <strong>demo123</strong></span>
+            <span>Use your registered Uni Vibe account.</span>
           </div>
         </form>
       ) : (
-        <form className="login__form" onSubmit={handleForgotSubmit}>
+        <div className="login__form">
           <p className="login__forgot-desc">
-            Enter your email and we'll send you instructions to reset your Uni Vibe password.
+            Password reset is not available yet. No reset email has been sent.
           </p>
-          <Input
-            label={t("auth.email")}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          {forgotSent ? (
-            <p className="login__success-msg">Reset link dispatched to your email!</p>
-          ) : (
-            <Button type="submit" variant="primary" className="login__submit">
-              Send Reset Instructions
-            </Button>
-          )}
           <button
             type="button"
             className="login__forgot-cancel"
@@ -117,7 +105,7 @@ function Login() {
           >
             Back to Login
           </button>
-        </form>
+        </div>
       )}
 
       <p className="login__divider">{t("auth.orContinue")}</p>

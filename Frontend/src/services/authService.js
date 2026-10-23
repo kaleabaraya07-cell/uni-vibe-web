@@ -1,22 +1,26 @@
-import { currentUser, mockUsers, mockCredentials } from "../data/mockUsers";
-import { mockUniversities } from "../data/mockUniversities";
+import apiClient, { ApiError } from "./apiClient";
 
-/**
- * Authentication & Account Service
- * Provides async abstractions ready for Python/FastAPI backend integration.
- */
+export function mapApiUser(user) {
+  return {
+    ...user,
+    name: user.display_name,
+    username: user.username?.startsWith("@") ? user.username : `@${user.username}`,
+    isStudent: user.is_student,
+    verificationStatus: user.verification_status,
+    verified: user.verification_status === "verified",
+    universityId: user.university_id,
+    university: user.university_id || "",
+    bio: user.bio || "",
+  };
+}
+
 export const authService = {
-  async login(email, password) {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    const user = mockUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (user && password === mockCredentials.password) {
-      return { success: true, user, token: "mock-jwt-token" };
-    }
-    // Also allow demo fallback
-    if (email === mockCredentials.email && password === mockCredentials.password) {
-      return { success: true, user: currentUser, token: "mock-jwt-token" };
-    }
-    throw new Error("Invalid email or password");
+  async login(email, password, rememberMe = true) {
+    const user = await apiClient("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password, remember_me: rememberMe }),
+    });
+    return { ok: true, user: mapApiUser(user) };
   },
 
   async signup({
@@ -26,46 +30,50 @@ export const authService = {
     password,
     isStudent = true,
     universityId = null,
-    departmentId = null,
+    departmentName = "",
   }) {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    if (!password) throw new Error("Password is required");
-
-    const selectedUni = universityId
-      ? mockUniversities.find((u) => u.id === universityId)
-      : null;
-
-    const newUser = {
-      id: `u_${Date.now()}`,
-      name,
-      username: username.startsWith("@") ? username : `@${username}`,
+    const payload = {
+      display_name: name,
+      username: username?.replace(/^@/, ""),
       email,
-      avatar: `https://i.pravatar.cc/150?u=${username}`,
-      coverImage: selectedUni?.cover || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80",
-      isStudent: Boolean(isStudent),
-      verificationStatus: isStudent ? "pending" : "none",
-      verified: false,
-      university: selectedUni?.shortName || (isStudent ? "Pending Verification" : ""),
-      universityId: isStudent ? universityId : null,
-      department: isStudent ? (departmentId || "General Studies") : "",
-      departmentId: isStudent ? departmentId : null,
-      year: isStudent ? "1st Year" : "",
-      bio: isStudent ? "Uni Vibe newcomer 🎓" : "Exploring campus life on Uni Vibe ✨",
-      followers: 0,
-      following: 0,
-      vibeCount: 0,
-      leaguePT: 0,
+      password,
+      is_student: Boolean(isStudent),
+      university_id: isStudent ? universityId : null,
+      department: isStudent ? departmentName : null,
     };
-
-    return { success: true, user: newUser, token: "mock-jwt-token" };
+    await apiClient("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return this.login(email, password);
   },
 
   async getCurrentUser() {
-    return currentUser;
+    try {
+      return mapApiUser(await apiClient("/auth/me"));
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) return null;
+      throw error;
+    }
+  },
+
+  async updateProfile({ name, bio, department }) {
+    return mapApiUser(await apiClient("/auth/me", {
+      method: "PATCH",
+      body: JSON.stringify({
+        display_name: name,
+        bio,
+        department: department || null,
+      }),
+    }));
   },
 
   async logout() {
-    return { success: true };
+    await apiClient("/auth/logout", { method: "POST" });
+  },
+
+  async socialLogin() {
+    throw new Error("External sign-in is not configured yet.");
   },
 };
 

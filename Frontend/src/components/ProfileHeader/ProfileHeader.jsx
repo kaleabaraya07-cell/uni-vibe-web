@@ -9,14 +9,20 @@ function ProfileHeader({ user, following, onFollow, onEditProfile }) {
   const { t } = useLocale();
   const { user: currentUser } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [shareError, setShareError] = useState("");
 
   const isOwnProfile = currentUser?.id === user?.id;
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const url = window.location.href;
-    navigator.clipboard?.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setShareError("");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setShareError("Unable to copy this profile link from your browser.");
+    }
   };
 
   return (
@@ -24,7 +30,7 @@ function ProfileHeader({ user, following, onFollow, onEditProfile }) {
       <div className="profile-header__avatar-wrap">
         <img src={user.avatar} alt={user.name} className="profile-header__avatar" />
         {user.isStudent ? (
-          <span className="profile-header__badge-pill student" title="Verified University Student">
+          <span className="profile-header__badge-pill student" title="University student">
             <GraduationCap size={14} />
           </span>
         ) : (
@@ -40,9 +46,13 @@ function ProfileHeader({ user, following, onFollow, onEditProfile }) {
             {user.name}
             {user.verified && <BadgeCheck size={22} className="profile-header__verified" />}
           </h1>
-          {user.isStudent ? (
+          {user.verified ? (
             <span className="verified-student-tag">
               <BadgeCheck size={13} /> Verified Student
+            </span>
+          ) : user.isStudent ? (
+            <span className="campus-explorer-tag">
+              <GraduationCap size={13} /> Verification pending
             </span>
           ) : (
             <span className="campus-explorer-tag">
@@ -82,7 +92,9 @@ function ProfileHeader({ user, following, onFollow, onEditProfile }) {
               <Button
                 variant={following ? "secondary" : "primary"}
                 onClick={onFollow}
+                disabled
                 className="profile-btn"
+                title="Following is not available yet"
               >
                 {following ? (t("common.following") || "Following") : (t("common.follow") || "Follow")}
               </Button>
@@ -93,6 +105,7 @@ function ProfileHeader({ user, following, onFollow, onEditProfile }) {
             </>
           )}
         </div>
+        {shareError && <p role="alert">{shareError}</p>}
       </div>
     </div>
   );

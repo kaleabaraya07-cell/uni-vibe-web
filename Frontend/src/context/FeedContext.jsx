@@ -1,113 +1,193 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
-import { mockVibes } from "../data/mockVibes";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { useAuth } from "./useAuth";
+import postService from "../services/postService";
 
 const FeedContext = createContext(null);
 
 export function FeedProvider({ children }) {
-  const [vibes, setVibes] = useState(mockVibes);
+  const { user, loading: authLoading } = useAuth();
+  const [vibes, setVibes] = useState([]);
+  const [savedVibes, setSavedVibes] = useState([]);
+  const [savedOwnerId, setSavedOwnerId] = useState(null);
   const [liked, setLiked] = useState(new Set());
-  const [saved, setSaved] = useState(new Set());
   const [reposted, setReposted] = useState(new Set());
-  const [shared, setShared] = useState(new Set());
-  const localMediaUrls = useRef(new Set());
-  const validViewIds = useRef(new Set());
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
-  useEffect(
-    () => () => {
-      localMediaUrls.current.forEach((url) => URL.revokeObjectURL(url));
-    },
-    []
-  );
+  const applyPosts = useCallback((posts, replace) => {
+    const next = replace ? posts : [...vibes, ...posts];
+    setVibes(next);
+    setLiked(new Set(next.filter((post) => post.viewerState.liked).map((post) => post.id)));
+    setReposted(new Set(next.filter((post) => post.viewerState.reposted).map((post) => post.id)));
+  }, [vibes]);
 
-  const toggleLike = useCallback((id) => {
-    setLiked((prev) => {
-      const next = new Set(prev);
-      const wasLiked = next.has(id);
-      if (wasLiked) next.delete(id);
-      else next.add(id);
-      setVibes((vibesList) =>
-        vibesList.map((v) =>
-          v.id === id ? { ...v, likes: v.likes + (wasLiked ? -1 : 1) } : v
-        )
-      );
-      return next;
-    });
+  const loadFeed = useCallback(async ({ nextPage = 1, replace = false } = {}) => {
+    if (replace) setLoading(true);
+    else setLoadingMore(true);
+    setError("");
+    try {
+      const result = await postService.getFeedPosts({ page: nextPage });
+      applyPosts(result.posts, replace);
+      setPage(nextPage);
+      setHasMore(result.hasMore);
+    } catch (requestError) {
+      setError(requestError.message || "Unable to load the feed.");
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [applyPosts]);
+
+  const refreshFeed = useCallback(() => loadFeed({ nextPage: 1, replace: true }), [loadFeed]);
+  const loadMore = useCallback(() => {
+    if (hasMore && !loadingMore) return loadFeed({ nextPage: page + 1 });
+    return Promise.resolve();
+  }, [hasMore, loadFeed, loadingMore, page]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    const request = window.setTimeout(() => void refreshFeed(), 0);
+    return () => window.clearTimeout(request);
+  }, [authLoading, refreshFeed, user?.id]);
+
+  useEffect(() => {
+    let active = true;
+    const userId = user?.id;
+    if (!userId || authLoading) {
+      return undefined;
+    }
+    postService
+      .getSavedPosts()
+      .then((posts) => {
+        if (!active) return;
+        setSavedVibes(posts);
+        setSavedOwnerId(userId);
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError.message || "Unable to load your saved vibes.");
+      });
+    return () => {
+      active = false;
+    };
+  }, [authLoading, user?.id]);
+
+  const toggleReaction = useCallback(async (id, kind) => {
+    setError("");
+    try {
+      const result = await postService[`toggle${kind}`](id);
+      if (kind !== "Save") {
+        const stateSetter = kind === "Like" ? setLiked : setReposted;
+        stateSetter((current) => {
+          const next = new Set(current);
+          if (result.active) next.add(id);
+          else next.delete(id);
+          return next;
+        });
+      }
+      const countKey = kind === "Like" ? "likes" : kind === "Save" ? "saves" : "reposts";
+      const stateKey = kind === "Like" ? "liked" : kind === "Save" ? "saved" : "reposted";
+      setVibes((current) => current.map((post) => (
+        post.id === id
+          ? {
+              ...post,
+              [countKey]: result.count,
+              viewerState: { ...post.viewerState, [stateKey]: result.active },
+            }
+          : post
+      )));
+      if (kind === "Save") {
+        if (result.active) {
+          const post = vibes.find((item) => item.id === id);
+          if (post && user) {
+            setSavedOwnerId(user.id);
+            setSavedVibes((current) => [
+              { ...post, saves: result.count, viewerState: { ...post.viewerState, saved: true } },
+              ...current.filter((item) => item.id !== id),
+            ]);
+          }
+        } else {
+          setSavedVibes((current) => current.filter((post) => post.id !== id));
+        }
+      }
+      return true;
+    } catch (requestError) {
+      setError(requestError.message || "Unable to update this vibe.");
+      return false;
+    }
+  }, [user, vibes]);
+
+  const toggleLike = useCallback((id) => toggleReaction(id, "Like"), [toggleReaction]);
+  const toggleSave = useCallback((id) => toggleReaction(id, "Save"), [toggleReaction]);
+  const toggleRepost = useCallback((id) => toggleReaction(id, "Repost"), [toggleReaction]);
+
+  const addComment = useCallback(async (id, body) => {
+    setError("");
+    try {
+      const comment = await postService.addComment(id, body);
+      setVibes((current) => current.map((post) => (
+        post.id === id ? { ...post, comments: post.comments + 1 } : post
+      )));
+      return comment;
+    } catch (requestError) {
+      setError(requestError.message || "Unable to add your comment.");
+      return null;
+    }
   }, []);
 
-  const toggleSave = useCallback((id) => {
-    setSaved((prev) => {
-      const next = new Set(prev);
-      const wasSaved = next.has(id);
-      if (wasSaved) next.delete(id);
-      else next.add(id);
-      setVibes((vibesList) =>
-        vibesList.map((v) =>
-          v.id === id ? { ...v, saves: v.saves + (wasSaved ? -1 : 1) } : v
-        )
-      );
-      return next;
-    });
-  }, []);
-
-  const toggleRepost = useCallback((id) => {
-    setReposted((prev) => {
-      const next = new Set(prev);
-      const wasReposted = next.has(id);
-      if (wasReposted) next.delete(id);
-      else next.add(id);
-      setVibes((vibesList) =>
-        vibesList.map((v) =>
-          v.id === id
-            ? { ...v, reposts: (v.reposts || 0) + (wasReposted ? -1 : 1) }
-            : v
-        )
-      );
-      return next;
-    });
-  }, []);
-
-  const toggleShare = useCallback((id) => {
-    setShared((prev) => new Set(prev).add(id));
-    setVibes((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, shares: v.shares + 1 } : v))
-    );
-  }, []);
-
-  const addComment = useCallback((id) => {
-    setVibes((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, comments: v.comments + 1 } : v))
-    );
-  }, []);
-
-  const addVibe = useCallback((vibe) => {
-    if (vibe.media.startsWith("blob:")) localMediaUrls.current.add(vibe.media);
-    setVibes((prev) => [vibe, ...prev]);
-  }, []);
+  const addVibe = useCallback(async ({ caption, file, category, hashtags }) => {
+    setError("");
+    try {
+      const post = await postService.createPost({ caption, file, category, hashtags });
+      applyPosts([post], false);
+      return post;
+    } catch (requestError) {
+      setError(requestError.message || "Unable to publish your vibe.");
+      throw requestError;
+    }
+  }, [applyPosts]);
 
   const hideVibe = useCallback((id) => {
-    setVibes((prev) => prev.filter((vibe) => vibe.id !== id));
+    setVibes((current) => current.filter((post) => post.id !== id));
   }, []);
 
-  const increaseRecommendation = useCallback((id) => {
-    setVibes((prev) => prev.map((vibe) => (vibe.id === id ? { ...vibe, recommendationScore: (vibe.recommendationScore || 0) + 1 } : vibe)));
+  const increaseRecommendation = useCallback(() => {
+    setError("Recommendations are not available until the server workflow is implemented.");
   }, []);
 
-  const recordValidView = useCallback((id) => {
-    if (validViewIds.current.has(id)) return;
-    validViewIds.current.add(id);
-    setVibes((prev) =>
-      prev.map((vibe) =>
-        vibe.id === id
-          ? { ...vibe, views: (vibe.views || 0) + 1, validViews: (vibe.validViews || 0) + 1 }
-          : vibe
-      )
-    );
+  const recordValidView = useCallback(async (id, viewSessionId) => {
+    if (!viewSessionId) return false;
+    try {
+      await postService.completeView(id, viewSessionId);
+      setVibes((current) => current.map((post) => (
+        post.id === id
+          ? { ...post, views: post.views + 1, validViews: post.validViews + 1 }
+          : post
+      )));
+      return true;
+    } catch (requestError) {
+      setError(requestError.message || "Unable to record this view.");
+      return false;
+    }
   }, []);
+
+  const startView = useCallback(async (id) => {
+    if (!user) return null;
+    try {
+      const result = await postService.startView(id);
+      return result.view_session_id;
+    } catch (requestError) {
+      setError(requestError.message || "Unable to start view tracking.");
+      return null;
+    }
+  }, [user]);
 
   const getSavedVibes = useCallback(
-    () => vibes.filter((v) => saved.has(v.id)),
-    [vibes, saved]
+    () => savedOwnerId === user?.id ? savedVibes : [],
+    [savedOwnerId, savedVibes, user?.id]
   );
 
   return (
@@ -115,21 +195,25 @@ export function FeedProvider({ children }) {
       value={{
         vibes,
         liked,
-        saved,
         reposted,
-        shared,
+        loading,
+        loadingMore,
+        hasMore,
+        error,
+        loadMore,
+        refreshFeed,
         toggleLike,
         toggleSave,
         toggleRepost,
-        toggleShare,
         addComment,
         addVibe,
         hideVibe,
         increaseRecommendation,
+        startView,
         recordValidView,
         getSavedVibes,
         isLiked: (id) => liked.has(id),
-        isSaved: (id) => saved.has(id),
+        isSaved: (id) => savedOwnerId === user?.id && savedVibes.some((post) => post.id === id),
         isReposted: (id) => reposted.has(id),
       }}
     >

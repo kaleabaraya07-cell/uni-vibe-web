@@ -5,9 +5,11 @@ React + Vite app — deploy to **Vercel**.
 ## Local Development
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
+
+Vite proxies `/api/v1` to `http://127.0.0.1:8000` for local development, so session cookies remain same-origin. Start the backend before using API-backed features. Set `VITE_API_URL` only when the API is hosted at a different URL.
 
 ## Build
 
@@ -27,4 +29,4 @@ npm run preview
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_API_URL` | Backend API base URL (Render) |
+| `VITE_API_URL` | Optional backend API base URL, including `/api/v1` (defaults to same-origin `/api/v1`) |

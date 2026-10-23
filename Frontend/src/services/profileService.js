@@ -1,40 +1,34 @@
-import { getUserById as getUById, currentUser, mockUsers } from "../data/mockUsers";
-import { mockVibes } from "../data/mockVibes";
+import apiClient from "./apiClient";
+import { mapApiUser } from "./authService";
+import postService from "./postService";
 
-/**
- * User Profile Service
- */
 export const profileService = {
-  async getProfile(userId) {
-    await new Promise((resolve) => setTimeout(resolve, 150));
-    const user = getUById(userId) || (userId === currentUser.id ? currentUser : null);
-    if (!user) throw new Error("User not found");
-    return { ...user };
+  async getUserProfile(userId) {
+    const user = await apiClient(`/users/${encodeURIComponent(userId)}`);
+    return mapApiUser(user);
   },
 
-  async updateProfile(userId, updates) {
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    const user = mockUsers.find((u) => u.id === userId) || currentUser;
-    Object.assign(user, updates);
-    return { ...user };
+  async updateProfile(params) {
+    return mapApiUser(await apiClient("/auth/me", {
+      method: "PATCH",
+      body: JSON.stringify({
+        display_name: params.name,
+        bio: params.bio,
+        department: params.department || null,
+      }),
+    }));
   },
 
-  async getUserPosts(userId) {
-    await new Promise((resolve) => setTimeout(resolve, 120));
-    return mockVibes.filter((v) => v.user.id === userId);
+  getUserPosts(userId) {
+    return postService.getUserPosts(userId).then((result) => result.posts);
   },
 
-  async getUserSavedPosts(userId) {
-    await new Promise((resolve) => setTimeout(resolve, 120));
-    if (!userId) throw new Error("User ID is required");
-    // Return mock saved vibes
-    return mockVibes.slice(0, 3);
+  getUserSavedPosts() {
+    return postService.getSavedPosts();
   },
 
-  async getUserLikedPosts(userId) {
-    await new Promise((resolve) => setTimeout(resolve, 120));
-    if (!userId) throw new Error("User ID is required");
-    return mockVibes.slice(1, 4);
+  getUserLikedPosts() {
+    return postService.getLikedPosts();
   },
 };
 
