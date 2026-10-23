@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { mockVibes } from "../data/mockVibes";
-import { postService } from "../services/postService";
 
 const FeedContext = createContext(null);
 
@@ -11,7 +10,15 @@ export function FeedProvider({ children }) {
   const [saved, setSaved] = useState(new Set());
   const [reposted, setReposted] = useState(new Set());
   const [shared, setShared] = useState(new Set());
-  const [hiddenIds, setHiddenIds] = useState(new Set());
+  const localMediaUrls = useRef(new Set());
+  const validViewIds = useRef(new Set());
+
+  useEffect(
+    () => () => {
+      localMediaUrls.current.forEach((url) => URL.revokeObjectURL(url));
+    },
+    []
+  );
 
   const toggleLike = useCallback((id) => {
     setLiked((prev) => {
@@ -74,16 +81,28 @@ export function FeedProvider({ children }) {
   }, []);
 
   const addVibe = useCallback((vibe) => {
+    if (vibe.media.startsWith("blob:")) localMediaUrls.current.add(vibe.media);
     setVibes((prev) => [vibe, ...prev]);
   }, []);
 
   const hideVibe = useCallback((id) => {
-    setHiddenIds((prev) => new Set(prev).add(id));
     setVibes((prev) => prev.filter((vibe) => vibe.id !== id));
   }, []);
 
   const increaseRecommendation = useCallback((id) => {
     setVibes((prev) => prev.map((vibe) => (vibe.id === id ? { ...vibe, recommendationScore: (vibe.recommendationScore || 0) + 1 } : vibe)));
+  }, []);
+
+  const recordValidView = useCallback((id) => {
+    if (validViewIds.current.has(id)) return;
+    validViewIds.current.add(id);
+    setVibes((prev) =>
+      prev.map((vibe) =>
+        vibe.id === id
+          ? { ...vibe, views: (vibe.views || 0) + 1, validViews: (vibe.validViews || 0) + 1 }
+          : vibe
+      )
+    );
   }, []);
 
   const getSavedVibes = useCallback(
@@ -107,6 +126,7 @@ export function FeedProvider({ children }) {
         addVibe,
         hideVibe,
         increaseRecommendation,
+        recordValidView,
         getSavedVibes,
         isLiked: (id) => liked.has(id),
         isSaved: (id) => saved.has(id),

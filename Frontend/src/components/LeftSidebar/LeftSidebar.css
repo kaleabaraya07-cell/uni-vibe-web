@@ -21,6 +21,24 @@
   margin-bottom: 12px;
 }
 
+.sidebar-profile__guest-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid rgba(45, 140, 255, 0.5);
+  margin-bottom: 12px;
+  display: grid;
+  place-items: center;
+  color: #2d8cff;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.sidebar-profile__guest-actions {
+  display: flex;
+  gap: 16px;
+}
+
 .sidebar-profile__info h3 {
   font-size: 16px;
   font-weight: 600;

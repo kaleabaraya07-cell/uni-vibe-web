@@ -21,14 +21,30 @@ function LeftSidebar() {
   return (
     <aside className="left-sidebar">
       <GlassPanel className="sidebar-profile">
-        <img src={user?.avatar} alt={user?.name} className="sidebar-profile__avatar" />
-        <div className="sidebar-profile__info">
-          <h3>{user?.name}</h3>
-          <p>{user?.username}</p>
-        </div>
-        <Link to={`/profile/${user?.id}`} className="sidebar-profile__link">
-          {t("nav.viewProfile")} <ChevronRight size={16} />
-        </Link>
+        {user ? (
+          <>
+            <img src={user.avatar} alt={user.name} className="sidebar-profile__avatar" />
+            <div className="sidebar-profile__info">
+              <h3>{user.name}</h3>
+              <p>{user.username}</p>
+            </div>
+            <Link to={`/profile/${user.id}`} className="sidebar-profile__link">
+              {t("nav.viewProfile")} <ChevronRight size={16} />
+            </Link>
+          </>
+        ) : (
+          <>
+            <div className="sidebar-profile__guest-avatar" aria-hidden="true">U</div>
+            <div className="sidebar-profile__info">
+              <h3>Explore Uni Vibe</h3>
+              <p>Sign in to connect with campus communities.</p>
+            </div>
+            <div className="sidebar-profile__guest-actions">
+              <Link to="/login" className="sidebar-profile__link">Log in</Link>
+              <Link to="/signup" className="sidebar-profile__link">Sign up</Link>
+            </div>
+          </>
+        )}
       </GlassPanel>
 
       <GlassPanel className="sidebar-nav">

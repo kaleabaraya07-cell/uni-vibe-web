@@ -24,14 +24,16 @@ export const profileService = {
     return mockVibes.filter((v) => v.user.id === userId);
   },
 
-  async getUserSavedPosts(_userId) {
+  async getUserSavedPosts(userId) {
     await new Promise((resolve) => setTimeout(resolve, 120));
+    if (!userId) throw new Error("User ID is required");
     // Return mock saved vibes
     return mockVibes.slice(0, 3);
   },
 
-  async getUserLikedPosts(_userId) {
+  async getUserLikedPosts(userId) {
     await new Promise((resolve) => setTimeout(resolve, 120));
+    if (!userId) throw new Error("User ID is required");
     return mockVibes.slice(1, 4);
   },
 };

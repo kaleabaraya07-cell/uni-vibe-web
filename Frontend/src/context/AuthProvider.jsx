@@ -4,27 +4,40 @@ import { mockUniversities } from "../data/mockUniversities";
 import { AuthContext } from "./AuthContext";
 
 export function AuthProvider({ children }) {
+  const [rememberUser, setRememberUser] = useState(() => {
+    try {
+      return Boolean(localStorage.getItem("univibe_current_user"));
+    } catch {
+      return true;
+    }
+  });
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem("univibe_current_user");
+      const saved =
+        localStorage.getItem("univibe_current_user") ||
+        sessionStorage.getItem("univibe_current_user");
       if (saved) return JSON.parse(saved);
     } catch {
-      // ignore json parse error
+      return null;
     }
-    return currentUser; // Default to demo user for seamless UX
+    return null;
   });
 
   useEffect(() => {
     try {
       if (user) {
-        localStorage.setItem("univibe_current_user", JSON.stringify(user));
+        const storage = rememberUser ? localStorage : sessionStorage;
+        const otherStorage = rememberUser ? sessionStorage : localStorage;
+        storage.setItem("univibe_current_user", JSON.stringify(user));
+        otherStorage.removeItem("univibe_current_user");
       } else {
         localStorage.removeItem("univibe_current_user");
+        sessionStorage.removeItem("univibe_current_user");
       }
     } catch {
       // ignore storage error
     }
-  }, [user]);
+  }, [rememberUser, user]);
 
   const login = useCallback((email, password, rememberMe = true) => {
     const cleanEmail = (email || "").trim().toLowerCase();
@@ -32,6 +45,7 @@ export function AuthProvider({ children }) {
       cleanEmail === mockCredentials.email.toLowerCase() &&
       password === mockCredentials.password
     ) {
+      setRememberUser(rememberMe);
       setUser(currentUser);
       return { ok: true, user: currentUser };
     }
@@ -39,11 +53,13 @@ export function AuthProvider({ children }) {
       (u) => u.email.toLowerCase() === cleanEmail && password === "demo123"
     );
     if (found) {
+      setRememberUser(rememberMe);
       setUser(found);
       return { ok: true, user: found };
     }
     // Also allow any demo login with password demo123
     if (cleanEmail && password === "demo123") {
+      setRememberUser(rememberMe);
       const demoFallback = {
         ...currentUser,
         email: cleanEmail,
@@ -113,6 +129,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     try {
       localStorage.removeItem("univibe_current_user");
+      sessionStorage.removeItem("univibe_current_user");
     } catch {
       // ignore
     }

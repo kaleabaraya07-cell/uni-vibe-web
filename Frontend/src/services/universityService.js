@@ -1,6 +1,5 @@
 import {
   mockUniversities,
-  mockDepartments,
   mockClubs,
   getUniversityById as getUniById,
   getDepartmentById as getDeptById,

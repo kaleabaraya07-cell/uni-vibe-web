@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { useLocale } from "../../context/LocaleContext";
 import { useAuth } from "../../context/useAuth";
 import GlassPanel from "../../components/GlassPanel/GlassPanel";
 import Button from "../../components/ui/Button/Button";
-import Input from "../../components/ui/Input/Input";
 import {
   Briefcase,
   GraduationCap,
@@ -11,7 +9,6 @@ import {
   Bell,
   CheckCircle2,
   Building2,
-  Compass,
   ArrowRight,
   TrendingUp,
 } from "lucide-react";
@@ -48,7 +45,6 @@ const upcomingCategories = [
 ];
 
 function Opportunities() {
-  const { t } = useLocale();
   const { user } = useAuth();
   const [email, setEmail] = useState(user?.email || "");
   const [interest, setInterest] = useState("all");

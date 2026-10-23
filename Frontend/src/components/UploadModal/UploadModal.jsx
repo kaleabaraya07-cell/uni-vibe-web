@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUpload } from "../../context/UploadContext";
 import { useFeed } from "../../context/FeedContext";
@@ -8,7 +8,6 @@ import Modal from "../ui/Modal/Modal";
 import Input from "../ui/Input/Input";
 import Button from "../ui/Button/Button";
 import { mockUniversities } from "../../data/mockUniversities";
-import { currentUser } from "../../data/mockUsers";
 import {
   Camera,
   Video,
@@ -31,19 +30,30 @@ const types = ["Photo", "Video", "Story", "Live Event", "Announcement", "Opportu
 function UploadModal() {
   const { open, closeUpload } = useUpload();
   const { addVibe } = useFeed();
-  const { user, switchAccount } = useAuth();
+  const { user } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [caption, setCaption] = useState("");
   const [category, setCategory] = useState(categories[0]);
   const [mediaType, setMediaType] = useState("Photo");
-  const [preview, setPreview] = useState("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80");
+  const [preview, setPreview] = useState("");
+  const [mediaError, setMediaError] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [selectedUniId, setSelectedUniId] = useState(user?.universityId || "uni1");
+  const previewObjectUrl = useRef(null);
+  const publishTimer = useRef(null);
 
   const isVerifiedStudent = Boolean(user?.isStudent && (user?.verified || user?.verificationStatus === "verified"));
+
+  useEffect(
+    () => () => {
+      if (previewObjectUrl.current) URL.revokeObjectURL(previewObjectUrl.current);
+      if (publishTimer.current) window.clearTimeout(publishTimer.current);
+    },
+    []
+  );
 
   const stepLabel = useMemo(() => {
     if (step === 1) return "Choose vibe type";
@@ -54,11 +64,17 @@ function UploadModal() {
 
   const handlePublish = () => {
     if (!caption.trim() || !user || !isVerifiedStudent) return;
+    if (!previewObjectUrl.current) {
+      setMediaError(mediaType === "Video"
+        ? "Choose a video file before publishing a video post."
+        : "Choose a photo or video file before publishing.");
+      return;
+    }
     setPublishing(true);
 
     const selectedUni = mockUniversities.find((u) => u.id === selectedUniId) || mockUniversities[0];
 
-    window.setTimeout(() => {
+    publishTimer.current = window.setTimeout(() => {
       addVibe({
         id: `v${Date.now()}`,
         type: mediaType === "Video" ? "video" : "image",
@@ -81,46 +97,70 @@ function UploadModal() {
         clubId: null,
         eventId: null,
       });
+      previewObjectUrl.current = null;
       setCaption("");
       setStep(4);
       setPublishing(false);
-      window.setTimeout(() => {
-        closeUpload();
+      publishTimer.current = window.setTimeout(() => {
+        publishTimer.current = null;
+        closeModal();
         navigate("/feed");
       }, 900);
     }, 800);
   };
 
   const closeModal = () => {
+    if (publishTimer.current) {
+      window.clearTimeout(publishTimer.current);
+      publishTimer.current = null;
+    }
+    setPublishing(false);
+    if (previewObjectUrl.current) {
+      URL.revokeObjectURL(previewObjectUrl.current);
+      previewObjectUrl.current = null;
+    }
     setStep(1);
     setCaption("");
     setCategory(categories[0]);
     setMediaType("Photo");
-    setPreview("https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80");
+    setPreview("");
+    setMediaError("");
     setDragActive(false);
     closeUpload();
   };
 
   const handleFileSelection = (file) => {
     if (!file) return;
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      setMediaError("Choose an image or video file.");
+      return;
+    }
+    if (previewObjectUrl.current) URL.revokeObjectURL(previewObjectUrl.current);
     const objectUrl = URL.createObjectURL(file);
+    previewObjectUrl.current = objectUrl;
     setPreview(objectUrl);
+    setMediaType(file.type.startsWith("video/") ? "Video" : "Photo");
+    setMediaError("");
     setStep(2);
   };
 
   return (
     <Modal open={open} onClose={closeModal} title={t("upload.title") || "Create New Vibe"}>
       <div className="upload-modal">
+        {mediaError && <p className="upload-modal__error" role="alert">{mediaError}</p>}
         {/* Core Verification Gate Check */}
         {!isVerifiedStudent ? (
           <div className="upload-modal__verification-gate">
             <div className="verification-gate__badge">
               <ShieldAlert size={36} className="gate-icon" />
             </div>
-            <h3 className="gate-title">Verified Student Account Required</h3>
+            <h3 className="gate-title">
+              {user ? "Verified Student Account Required" : "Log in to create a post"}
+            </h3>
             <p className="gate-message">
-              Only verified university students can create and publish posts on Uni Vibe.
-              This guarantees that all campus stories, events, and vibe points genuinely represent active student bodies.
+              {user
+                ? "Only verified university students can create and publish posts on Uni Vibe. This helps ensure campus posts represent active student communities."
+                : "Sign in with a verified student account to share campus posts."}
             </p>
             {user?.isStudent && user?.verificationStatus === "pending" ? (
               <div className="gate-pending-box">
@@ -132,16 +172,17 @@ function UploadModal() {
               <Button variant="secondary" onClick={closeModal}>
                 Continue Browsing
               </Button>
-              {switchAccount ? (
+              {!user && (
                 <Button
                   variant="primary"
                   onClick={() => {
-                    switchAccount(currentUser);
+                    closeModal();
+                    navigate("/login");
                   }}
                 >
-                  Switch to Verified Student Demo
+                  Log in
                 </Button>
-              ) : null}
+              )}
             </div>
           </div>
         ) : (
@@ -177,14 +218,20 @@ function UploadModal() {
                   <button type="button" className="upload-modal__option" onClick={() => setStep(2)}><Video size={16} /> Video</button>
                   <button type="button" className="upload-modal__option" onClick={() => setStep(2)}><Camera size={16} /> Camera</button>
                 </div>
-                <Button variant="primary" className="upload-modal__publish" onClick={() => setStep(2)}>Continue to preview</Button>
+                <Button variant="primary" className="upload-modal__publish" onClick={() => setStep(2)} disabled={!preview}>Continue to preview</Button>
               </>
             )}
 
             {step === 2 && (
               <>
                 <div className="upload-modal__preview">
-                  <img src={preview} alt="preview" className="upload-modal__preview-image" />
+                  {mediaType === "Video" && preview ? (
+                    <video src={preview} controls playsInline className="upload-modal__preview-image" />
+                  ) : preview ? (
+                    <img src={preview} alt="preview" className="upload-modal__preview-image" />
+                  ) : (
+                    <div className="upload-modal__preview-placeholder">Choose a media file to preview it here.</div>
+                  )}
                   <div className="upload-modal__preview-overlay">
                     <strong>{mediaType}</strong>
                     <span>Tap through to preview your vibe</span>

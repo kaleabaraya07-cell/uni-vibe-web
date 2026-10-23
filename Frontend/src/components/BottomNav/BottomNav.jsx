@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom";
-import GlassPanel from "../GlassPanel/GlassPanel";
 import { Home, Trophy, Megaphone, Plus, MessageCircle, User } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../context/LocaleContext";
@@ -38,7 +37,7 @@ function BottomNav() {
             </button>
           );
         }
-        const path = item.id === "me" ? `/profile/${user?.id || "u1"}` : item.path;
+        const path = item.id === "me" ? (user ? `/profile/${user.id}` : "/login") : item.path;
         return (
           <NavLink
             key={item.id}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BadgeCheck, GraduationCap, Compass, Share2, Edit3, MessageCircle, Check } from "lucide-react";
+import { BadgeCheck, GraduationCap, Compass, Share2, Edit3, Check } from "lucide-react";
 import { useLocale } from "../../context/LocaleContext";
 import { useAuth } from "../../context/useAuth";
 import Button from "../ui/Button/Button";

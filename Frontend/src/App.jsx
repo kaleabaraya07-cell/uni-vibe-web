@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { LocaleProvider } from "./context/LocaleContext";
 import { AuthProvider } from "./context/AuthProvider";
 import { FeedProvider } from "./context/FeedContext";
@@ -45,13 +45,7 @@ function App() {
                         <Route path="/login" element={<Login />} />
                         <Route path="/signup" element={<SignUp />} />
                       </Route>
-                      <Route
-                        element={
-                          <ProtectedRoute>
-                            <AppLayout />
-                          </ProtectedRoute>
-                        }
-                      >
+                      <Route element={<AppLayout />}>
                         <Route index element={<Home />} />
                         <Route path="feed" element={<Feed />} />
                         <Route path="live" element={<Live />} />
@@ -62,13 +56,15 @@ function App() {
                         <Route path="club/:id" element={<Club />} />
                         <Route path="event/:id" element={<Event />} />
                         <Route path="rankings" element={<Rankings />} />
-                        <Route path="saved" element={<Saved />} />
-                        <Route path="chat" element={<Chat />} />
-                        <Route path="chat/:id" element={<ChatRoom />} />
-                        <Route path="notifications" element={<Notifications />} />
                         <Route path="opportunities" element={<Opportunities />} />
-                        <Route path="settings" element={<Settings />} />
-                        <Route path="upload" element={<Upload />} />
+                        <Route element={<ProtectedRoute><Outlet /></ProtectedRoute>}>
+                          <Route path="saved" element={<Saved />} />
+                          <Route path="chat" element={<Chat />} />
+                          <Route path="chat/:id" element={<ChatRoom />} />
+                          <Route path="notifications" element={<Notifications />} />
+                          <Route path="settings" element={<Settings />} />
+                          <Route path="upload" element={<Upload />} />
+                        </Route>
                       </Route>
                       <Route path="*" element={<NotFound />} />
                     </Routes>

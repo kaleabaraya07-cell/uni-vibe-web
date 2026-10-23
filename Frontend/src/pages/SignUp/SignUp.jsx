@@ -15,7 +15,6 @@ import {
   Compass,
   CheckCircle2,
   Building2,
-  HelpCircle,
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";

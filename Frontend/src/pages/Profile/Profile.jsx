@@ -1,19 +1,16 @@
 import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { getUserById, currentUser, mockUsers } from "../../data/mockUsers";
+import { useParams, Link } from "react-router-dom";
+import { getUserById, currentUser } from "../../data/mockUsers";
 import { mockVibes } from "../../data/mockVibes";
 import { useAuth } from "../../context/useAuth";
 import { useFeed } from "../../context/FeedContext";
 import ProfileHeader from "../../components/ProfileHeader/ProfileHeader";
-import StoryRing from "../../components/StoryRing/StoryRing";
 import GlassPanel from "../../components/GlassPanel/GlassPanel";
 import Modal from "../../components/ui/Modal/Modal";
 import Input from "../../components/ui/Input/Input";
 import Button from "../../components/ui/Button/Button";
 import {
   Trophy,
-  Flame,
-  Award,
   Bookmark,
   Heart,
   Grid,
@@ -27,8 +24,7 @@ import "./Profile.css";
 
 function Profile() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { user: authUser, switchAccount } = useAuth();
+  const { user: authUser } = useAuth();
   const { getSavedVibes } = useFeed();
 
   // Find user or default to currentUser
@@ -58,11 +54,6 @@ function Profile() {
         : activeTab === "media"
           ? mediaVibes
           : vibes;
-
-  const storyUsers = [
-    currentUser,
-    ...mockUsers.filter((p) => p.id !== currentUser.id),
-  ].slice(0, 5);
 
   const handleSaveProfile = (e) => {
     e.preventDefault();

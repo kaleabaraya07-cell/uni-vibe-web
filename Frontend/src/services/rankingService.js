@@ -31,8 +31,9 @@ export const rankingService = {
     return [...mockTopContributors];
   },
 
-  async getUserLeagueInfo(_userId) {
+  async getUserLeagueInfo(userId) {
     await new Promise((resolve) => setTimeout(resolve, 100));
+    if (!userId) throw new Error("User ID is required");
     return { ...mockUserUniversityLeagueInfo };
   },
 

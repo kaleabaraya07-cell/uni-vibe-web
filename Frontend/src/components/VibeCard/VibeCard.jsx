@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./VibeCard.css";
 import {
   Heart,
@@ -21,7 +21,6 @@ import {
   Ban,
   Volume2,
   FolderPlus,
-  Clock3,
   ChevronRight,
   Check,
 } from "lucide-react";
@@ -39,6 +38,9 @@ function VibeCard({ vibe }) {
     toggleRepost,
     toggleShare,
     addComment,
+    hideVibe,
+    increaseRecommendation,
+    recordValidView,
     isLiked,
     isSaved,
     isReposted,
@@ -55,10 +57,14 @@ function VibeCard({ vibe }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuClosing, setMenuClosing] = useState(false);
+  const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [reportOpen, setReportOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [commentCount, setCommentCount] = useState(comments);
   const [repostToast, setRepostToast] = useState(false);
+  const [mediaError, setMediaError] = useState(false);
   const menuRef = useRef(null);
+  const videoRef = useRef(null);
 
   const demoComments = useMemo(
     () => [
@@ -70,7 +76,7 @@ function VibeCard({ vibe }) {
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
-    setCommentCount((prev) => prev + 1);
+    addComment(vibe.id);
     setCommentText("");
   };
 
@@ -82,7 +88,17 @@ function VibeCard({ vibe }) {
     }
   };
 
-  const closeMenu = () => {
+  const handleVideoTimeUpdate = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    let watchedSeconds = 0;
+    for (let index = 0; index < video.played.length; index += 1) {
+      watchedSeconds += video.played.end(index) - video.played.start(index);
+    }
+    if (watchedSeconds >= 4) recordValidView(vibe.id);
+  };
+
+  const closeMenu = useCallback(() => {
     if (!menuOpen && !menuClosing) return;
     setMenuClosing(true);
     setSpeedMenuOpen(false);
@@ -90,7 +106,7 @@ function VibeCard({ vibe }) {
       setMenuOpen(false);
       setMenuClosing(false);
     }, 180);
-  };
+  }, [menuClosing, menuOpen]);
 
   const toggleMenu = () => {
     if (menuOpen) {
@@ -123,11 +139,27 @@ function VibeCard({ vibe }) {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [menuOpen, menuClosing]);
+  }, [menuOpen, menuClosing, closeMenu]);
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = playbackSpeed;
+  }, [media, playbackSpeed, type]);
 
   return (
     <article className="vibe-card">
-      <img src={media} alt="" className="vibe-card__media" />
+      {type === "video" && !mediaError ? (
+        <video
+          ref={videoRef}
+          src={media}
+          className="vibe-card__media"
+          controls
+          playsInline
+          onTimeUpdate={handleVideoTimeUpdate}
+          onError={() => setMediaError(true)}
+        />
+      ) : (
+        <img src={media} alt="" className="vibe-card__media" />
+      )}
 
       {repostToast && (
         <div className="vibe-card__repost-toast">
@@ -150,11 +182,11 @@ function VibeCard({ vibe }) {
         <button
           type="button"
           className="vibe-card__action"
-          onClick={() => { addComment(vibe.id); setCommentsOpen(true); }}
+          onClick={() => setCommentsOpen(true)}
           title="Comments"
         >
           <MessageCircle size={24} />
-          <span>{formatCount(commentCount)}</span>
+          <span>{formatCount(comments)}</span>
         </button>
 
         <button
@@ -207,22 +239,24 @@ function VibeCard({ vibe }) {
           <button type="button" onClick={() => { setReportOpen(true); closeMenu(); }}><Ban size={16} /> Report</button>
           <button type="button" onClick={closeMenu}><Volume2 size={16} /> Block User</button>
           <button type="button" onClick={closeMenu}><Volume2 size={16} /> Mute User</button>
-          <div className="vibe-card__menu-group">
-            <button type="button" className="vibe-card__speed-trigger" onClick={() => setSpeedMenuOpen((prev) => !prev)}>
-              <span>Playback Speed</span>
-              <ChevronRight size={14} />
-            </button>
-            {speedMenuOpen && (
-              <div className="vibe-card__speed-row">
-                {[0.5, 1, 1.5, 2].map((value) => (
-                  <button key={value} type="button" className={playbackSpeed === value ? "active" : ""} onClick={() => { setPlaybackSpeed(value); setSpeedMenuOpen(false); }}>
-                    {value === 1 ? "1.0x" : `${value}x`}
-                    {playbackSpeed === value && <Check size={12} />}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {type === "video" && !mediaError && (
+            <div className="vibe-card__menu-group">
+              <button type="button" className="vibe-card__speed-trigger" onClick={() => setSpeedMenuOpen((prev) => !prev)}>
+                <span>Playback Speed</span>
+                <ChevronRight size={14} />
+              </button>
+              {speedMenuOpen && (
+                <div className="vibe-card__speed-row">
+                  {[0.5, 1, 1.5, 2].map((value) => (
+                    <button key={value} type="button" className={playbackSpeed === value ? "active" : ""} onClick={() => { setPlaybackSpeed(value); setSpeedMenuOpen(false); }}>
+                      {value === 1 ? "1.0x" : `${value}x`}
+                      {playbackSpeed === value && <Check size={12} />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

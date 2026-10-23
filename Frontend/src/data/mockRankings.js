@@ -1,4 +1,3 @@
-import { mockUniversities } from "./mockUniversities";
 import { mockUsers, currentUser } from "./mockUsers";
 
 /**

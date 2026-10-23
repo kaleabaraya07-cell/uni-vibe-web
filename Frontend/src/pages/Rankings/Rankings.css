@@ -690,34 +690,6 @@
   line-height: 1.45;
 }
 
-.rule-card code {
-  color: #7dd3fc;
-  font-size: 11px;
-}
-
-.formula-deep-dive {
-  background: rgba(2, 6, 23, 0.7);
-  border: 1px solid rgba(45, 140, 255, 0.2);
-  border-radius: 12px;
-  padding: 18px;
-  margin-top: 6px;
-}
-
-.formula-deep-dive h4 {
-  font-size: 14px;
-  color: #2d8cff;
-  margin: 0 0 10px 0;
-}
-
-.formula-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
-  color: #a5d8ff;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  margin: 0;
-}
-
 @media (max-width: 900px) {
   .league-highlights-grid {
     grid-template-columns: 1fr;

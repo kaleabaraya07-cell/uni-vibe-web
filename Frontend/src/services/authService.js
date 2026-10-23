@@ -29,6 +29,7 @@ export const authService = {
     departmentId = null,
   }) {
     await new Promise((resolve) => setTimeout(resolve, 300));
+    if (!password) throw new Error("Password is required");
 
     const selectedUni = universityId
       ? mockUniversities.find((u) => u.id === universityId)

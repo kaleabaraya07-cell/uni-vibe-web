@@ -1,25 +1,38 @@
-import { useEffect, useMemo, useState } from "react";
-import { Plus, Sparkles, Camera, Clock3, Video, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Sparkles, Clock3, Video, Image as ImageIcon } from "lucide-react";
 import Modal from "../ui/Modal/Modal";
 import Input from "../ui/Input/Input";
 import Button from "../ui/Button/Button";
 import StoryViewer from "../StoryViewer/StoryViewer";
 import { mockStories } from "../../data/mockStories";
 import { useAuth } from "../../context/useAuth";
-import StoryRing from "../StoryRing/StoryRing";
 import "./Stories.css";
 
 function Stories() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stories, setStories] = useState(mockStories);
   const [activeIndex, setActiveIndex] = useState(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [draftText, setDraftText] = useState("");
   const [draftType, setDraftType] = useState("image");
   const [preview, setPreview] = useState("");
+  const [mediaError, setMediaError] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [composerStep, setComposerStep] = useState("create");
+  const previewObjectUrl = useRef(null);
+  const storyObjectUrls = useRef(new Set());
+  const publishTimer = useRef(null);
+
+  useEffect(
+    () => () => {
+      storyObjectUrls.current.forEach((url) => URL.revokeObjectURL(url));
+      if (publishTimer.current) window.clearTimeout(publishTimer.current);
+    },
+    []
+  );
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -41,17 +54,39 @@ function Stories() {
     setActiveIndex((prev) => (prev === null ? orderedStories.length - 1 : prev - 1 < 0 ? orderedStories.length - 1 : prev - 1));
   };
 
+  const startStoryComposer = () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    setComposerOpen(true);
+    setComposerStep("create");
+  };
+
   const handlePreview = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      setMediaError("Choose an image or video file.");
+      return;
+    }
+    if (previewObjectUrl.current) {
+      URL.revokeObjectURL(previewObjectUrl.current);
+      storyObjectUrls.current.delete(previewObjectUrl.current);
+    }
     const url = URL.createObjectURL(file);
+    previewObjectUrl.current = url;
+    storyObjectUrls.current.add(url);
     setPreview(url);
+    setDraftType(file.type.startsWith("video/") ? "video" : "image");
+    setMediaError("");
   };
 
   const handlePublishStory = () => {
-    if (!draftText.trim()) return;
+    if (!user || !draftText.trim()) return;
     setPublishing(true);
-    window.setTimeout(() => {
+    publishTimer.current = window.setTimeout(() => {
+      publishTimer.current = null;
       const newStory = {
         id: `s${Date.now()}`,
         user,
@@ -62,6 +97,7 @@ function Stories() {
         viewed: false,
       };
       setStories((prev) => [newStory, ...prev]);
+      previewObjectUrl.current = null;
       setDraftText("");
       setPreview("");
       setPublishing(false);
@@ -71,6 +107,24 @@ function Stories() {
     }, 900);
   };
 
+  const closeComposer = () => {
+    if (publishTimer.current) {
+      window.clearTimeout(publishTimer.current);
+      publishTimer.current = null;
+    }
+    setPublishing(false);
+    if (previewObjectUrl.current) {
+      URL.revokeObjectURL(previewObjectUrl.current);
+      storyObjectUrls.current.delete(previewObjectUrl.current);
+      previewObjectUrl.current = null;
+    }
+    setComposerOpen(false);
+    setComposerStep("create");
+    setPreview("");
+    setDraftText("");
+    setMediaError("");
+  };
+
   return (
     <section className="stories-shell">
       <div className="stories-shell__header">
@@ -78,13 +132,13 @@ function Stories() {
           <p className="stories-shell__eyebrow">Stories</p>
           <h3>Campus moments in motion</h3>
         </div>
-        <button type="button" className="stories-shell__add" onClick={() => setComposerOpen(true)}>
+        <button type="button" className="stories-shell__add" onClick={startStoryComposer} aria-label="Add story">
           <Plus size={16} />
         </button>
       </div>
 
       <div className="stories-list">
-        <button type="button" className="story-pill story-pill--add" onClick={() => { setComposerOpen(true); setComposerStep("create"); }}>
+        <button type="button" className="story-pill story-pill--add" onClick={startStoryComposer}>
           <div className="story-pill__avatar story-pill__avatar--add">
             <Plus size={18} />
           </div>
@@ -116,8 +170,9 @@ function Stories() {
         />
       )}
 
-      <Modal open={composerOpen} onClose={() => { setComposerOpen(false); setComposerStep("create"); }} title="Create a story">
+      <Modal open={composerOpen} onClose={closeComposer} title="Create a story">
         <div className="story-composer">
+          {mediaError && <p role="alert">{mediaError}</p>}
           {composerStep === "create" ? (
             <>
               <div className="story-composer__type-row">
@@ -147,7 +202,13 @@ function Stories() {
           ) : (
             <>
               <div className="story-composer__preview-card">
-                {preview ? <img src={preview} alt="preview" className="story-composer__preview-card-image" /> : <div className="story-composer__text-card">{draftText}</div>}
+                {draftType === "video" && preview ? (
+                  <video src={preview} controls playsInline className="story-composer__preview-card-image" />
+                ) : preview && draftType === "image" ? (
+                  <img src={preview} alt="preview" className="story-composer__preview-card-image" />
+                ) : (
+                  <div className="story-composer__text-card">{draftText}</div>
+                )}
               </div>
               <div className="story-composer__meta">
                 <div><strong>{user?.name}</strong><p>{draftText}</p></div>

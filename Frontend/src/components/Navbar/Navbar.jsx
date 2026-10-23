@@ -46,9 +46,13 @@ function Navbar() {
           <Bell size={22} />
           {unreadCount > 0 && <span className="navbar__badge">{unreadCount}</span>}
         </Link>
-        <Link to={`/profile/${user?.id}`}>
-          <img className="profile" src={user?.avatar} alt={user?.name} />
-        </Link>
+        {user ? (
+          <Link to={`/profile/${user.id}`} aria-label="Your profile">
+            <img className="profile" src={user.avatar} alt={user.name} />
+          </Link>
+        ) : (
+          <Link to="/login" className="navbar__login">{t("auth.login")}</Link>
+        )}
       </div>
     </header>
   );

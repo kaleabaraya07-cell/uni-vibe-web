@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/useAuth";
-import { useLocale } from "../../context/LocaleContext";
 import GlassPanel from "../../components/GlassPanel/GlassPanel";
-import Button from "../../components/ui/Button/Button";
 import {
   CURRENT_SEASON,
   mockLeagueLeaderboard,
@@ -18,21 +16,17 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Minus,
-  Sparkles,
   Info,
   Clock,
   ShieldCheck,
   ChevronRight,
   Award,
   Users,
-  Compass,
 } from "lucide-react";
 import "./Rankings.css";
 
 function Rankings() {
   const { user } = useAuth();
-  const { t } = useLocale();
-  const [showFormulaDetails, setShowFormulaDetails] = useState(false);
   const [selectedTab, setSelectedTab] = useState("all"); // 'all' | 'my-uni' | 'contributors'
 
   const userUniId = user?.universityId || "uni1";
@@ -334,79 +328,52 @@ function Rankings() {
         </div>
       </section>
 
-      {/* "How Points Work" Explainer Section */}
+      {/* Plain-language overview; scoring details remain server-side. */}
       <section className="league-section explainer-section">
         <GlassPanel className="how-points-work-card">
-          <div
-            className="how-points-work__header"
-            onClick={() => setShowFormulaDetails(!showFormulaDetails)}
-          >
+          <div className="how-points-work__header">
             <div className="how-points-work__title">
               <Info size={20} className="info-icon" />
               <div>
-                <h3>How Points (PT) Work in Uni Vibe League</h3>
-                <p>The official transparent ranking algorithm powering collegiate standings.</p>
+                <h3>How the Uni Vibe League works</h3>
+                <p>Standings recognize authentic, verified participation in university life.</p>
               </div>
             </div>
-            <button type="button" className="how-points-toggle-btn">
-              {showFormulaDetails ? "Hide Details" : "Inspect Formula"}
-            </button>
           </div>
 
           <div className="points-rules-grid">
             <div className="rule-card">
               <span className="rule-badge">1</span>
-              <h4>Valid Views (V)</h4>
+              <h4>Meaningful views</h4>
               <p>
-                A ranking view requires watching for <strong>4.0+ seconds</strong>. Rapid scrolling and quick swipes do not count.
+                Posts need genuine watch time to contribute. Brief scroll-bys are not treated as meaningful views.
               </p>
             </div>
 
             <div className="rule-card">
               <span className="rule-badge">2</span>
-              <h4>Engagement Multipliers</h4>
+              <h4>Community engagement</h4>
               <p>
-                <strong>Like = 1×</strong><br />
-                <strong>Save = 5×</strong><br />
-                <strong>Repost = 5×</strong>
+                Likes, saves, and reposts help show which campus moments resonate with the community.
               </p>
             </div>
 
             <div className="rule-card">
               <span className="rule-badge">3</span>
-              <h4>Confidence Factor</h4>
+              <h4>Verified contributions</h4>
               <p>
-                Scaled by <code>sqrt(V) / (sqrt(V) + sqrt(1000))</code> so posts with 10 views don't unfairly outrank proven campus moments.
+                Only eligible posts from verified university communities contribute to their standings.
               </p>
             </div>
 
             <div className="rule-card">
               <span className="rule-badge">4</span>
-              <h4>Season Permanence</h4>
+              <h4>Seasonal standings</h4>
               <p>
-                Posts permanently belong to the season in which they are published (Jan 1 – Dec 31 UTC). No carryover points.
+                Each season recognizes activity from its own dates, so every university starts fresh.
               </p>
             </div>
           </div>
-
-          {showFormulaDetails && (
-            <div className="formula-deep-dive">
-              <h4>Official Post PT Formula</h4>
-              <pre className="formula-code">
-{`PostPT = [ Like Rate + (Save Rate × 5) + (Repost Rate × 5) ]
-         × [ sqrt(V) / (sqrt(V) + sqrt(1000)) ]
-         × 0.01
-
-Where:
-• V = Valid Views (>= 4s watch time)
-• Like Rate   = (Likes / V) × 100
-• Save Rate   = (Saves / V) × 100
-• Repost Rate = (Reposts / V) × 100
-
-University PT = Sum of all qualifying Post PT within Season 2026`}
-              </pre>
-            </div>
-          )}
         </GlassPanel>
       </section>
     </div>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Pause, Play, X, Clock3, Camera, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play, X, Clock3 } from "lucide-react";
 import "./StoryViewer.css";
 
 function StoryViewer({ stories, activeIndex, onClose, onNext, onPrev }) {
