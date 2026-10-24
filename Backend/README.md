@@ -66,3 +66,11 @@ Starting a view creates an authenticated view session. Completion must include `
 ## Configuration
 
 Configuration is loaded from `Backend/.env` or process environment variables. See `.env.example` for the supported local settings. Media uploads are stored under the configured `UPLOADS_DIR` (default `Backend/uploads/`, ignored by Git).
+
+Profile pictures and banners are uploaded by an authenticated user with
+`POST /api/v1/auth/me/images/avatar` or `POST /api/v1/auth/me/images/cover`
+using a multipart `image` field. JPEG, PNG, and WebP files up to 5 MiB are
+accepted. User profile responses expose the stored images as `avatar_url` and
+`cover_image_url`; those URLs use the existing safe `GET /api/v1/media/{filename}`
+endpoint. Keep `UPLOADS_DIR` on persistent storage for the images to survive
+backend restarts.

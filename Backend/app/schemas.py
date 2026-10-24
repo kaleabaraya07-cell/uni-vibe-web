@@ -49,6 +49,8 @@ class UserRead(BaseModel):
     university_id: str | None
     department: str | None
     bio: str
+    avatar_url: str | None
+    cover_image_url: str | None
     created_at: datetime
 
 
@@ -63,6 +65,8 @@ class PublicUserRead(BaseModel):
     university_id: str | None
     department: str | None
     bio: str
+    avatar_url: str | None
+    cover_image_url: str | None
     created_at: datetime
 
 
@@ -107,6 +111,7 @@ class PostAuthorRead(BaseModel):
     university_id: str | None
     is_student: bool
     verification_status: str
+    avatar_url: str | None
 
 
 class PostRead(BaseModel):

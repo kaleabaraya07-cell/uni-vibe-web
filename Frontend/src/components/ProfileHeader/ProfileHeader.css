@@ -10,6 +10,35 @@
   flex-shrink: 0;
 }
 
+.profile-header__file-input,
+.profile-page__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.profile-header__avatar-edit {
+  position: absolute;
+  left: 4px;
+  bottom: 5px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #060d18;
+  border-radius: 50%;
+  background: #2d8cff;
+  color: #fff;
+  cursor: pointer;
+}
+
 .profile-header__avatar {
   width: 104px;
   height: 104px;
@@ -157,5 +186,9 @@
   }
   .profile-header__actions {
     justify-content: center;
+  }
+  .profile-header__avatar-edit {
+    width: 36px;
+    height: 36px;
   }
 }

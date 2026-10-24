@@ -208,6 +208,154 @@ def test_upload_rejects_unsupported_and_mismatched_media(client, tmp_path, monke
     assert list(tmp_path.iterdir()) == []
 
 
+def test_authenticated_profile_image_upload_persists_and_is_retrievable(
+    client, tmp_path, monkeypatch
+):
+    from app.api.routes.auth import settings
+
+    response = register(client, email="profile@example.com", username="profile_user")
+    user_id = response.json()["id"]
+    assert client.post(
+        "/api/v1/auth/login",
+        json={"email": "profile@example.com", "password": "a-long-test-password"},
+    ).status_code == 200
+    monkeypatch.setattr(settings, "uploads_dir", tmp_path)
+
+    uploaded = client.post(
+        "/api/v1/auth/me/images/avatar",
+        files={"image": ("avatar.png", b"\x89PNG\r\n\x1a\navatar-content", "image/png")},
+    )
+    assert uploaded.status_code == 200
+    avatar_url = uploaded.json()["avatar_url"]
+    assert avatar_url.startswith("/api/v1/media/")
+    assert uploaded.json()["cover_image_url"] is None
+
+    profile = client.get(f"/api/v1/users/{user_id}")
+    assert profile.json()["avatar_url"] == avatar_url
+    assert profile.json()["cover_image_url"] is None
+    database_user = client.app.state.test_session.get(User, user_id)
+    assert database_user.avatar_path == avatar_url.rsplit("/", 1)[1]
+    assert database_user.cover_image_path is None
+
+    image = client.get(avatar_url)
+    assert image.status_code == 200
+    assert image.content == b"\x89PNG\r\n\x1a\navatar-content"
+    assert image.headers["content-type"] == "image/png"
+    assert client.get("/api/v1/auth/me").json()["avatar_url"] == avatar_url
+
+
+def test_profile_image_upload_requires_authentication(client, tmp_path, monkeypatch):
+    from app.api.routes.auth import settings
+
+    monkeypatch.setattr(settings, "uploads_dir", tmp_path)
+    response = client.post(
+        "/api/v1/auth/me/images/avatar",
+        files={"image": ("avatar.png", b"\x89PNG\r\n\x1a\nimage", "image/png")},
+    )
+    assert response.status_code == 401
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_profile_image_upload_rejects_invalid_type_and_size_without_replacing(
+    client, tmp_path, monkeypatch
+):
+    import app.api.routes.auth as auth_routes
+
+    from app.api.routes.auth import settings
+
+    registered = register(client, email="profile@example.com", username="profile_user")
+    user_id = registered.json()["id"]
+    client.post(
+        "/api/v1/auth/login",
+        json={"email": "profile@example.com", "password": "a-long-test-password"},
+    )
+    monkeypatch.setattr(settings, "uploads_dir", tmp_path)
+    first = client.post(
+        "/api/v1/auth/me/images/avatar",
+        files={"image": ("avatar.png", b"\x89PNG\r\n\x1a\nfirst", "image/png")},
+    )
+    assert first.status_code == 200
+    original_url = first.json()["avatar_url"]
+    original_name = original_url.rsplit("/", 1)[1]
+
+    invalid_type = client.post(
+        "/api/v1/auth/me/images/avatar",
+        files={"image": ("image.svg", b"<svg/>", "image/svg+xml")},
+    )
+    assert invalid_type.status_code == 415
+    invalid_content = client.post(
+        "/api/v1/auth/me/images/avatar",
+        files={"image": ("image.png", b"not png", "image/png")},
+    )
+    assert invalid_content.status_code == 415
+
+    monkeypatch.setattr(auth_routes, "PROFILE_IMAGE_MAX_BYTES", 10)
+    oversized = client.post(
+        "/api/v1/auth/me/images/avatar",
+        files={"image": ("large.png", b"\x89PNG\r\n\x1a\nmore-than-ten", "image/png")},
+    )
+    assert oversized.status_code == 413
+    database_user = client.app.state.test_session.get(User, user_id)
+    assert database_user.avatar_path == original_name
+    assert (tmp_path / original_name).exists()
+    assert len(list(tmp_path.iterdir())) == 1
+
+
+def test_profile_image_replacement_removes_old_media_and_other_users_cannot_change_it(
+    client, tmp_path, monkeypatch
+):
+    from app.api.routes.auth import settings
+
+    first_user = register(client, email="first@example.com", username="first_profile")
+    first_id = first_user.json()["id"]
+    client.post(
+        "/api/v1/auth/login",
+        json={"email": "first@example.com", "password": "a-long-test-password"},
+    )
+    monkeypatch.setattr(settings, "uploads_dir", tmp_path)
+    first_upload = client.post(
+        "/api/v1/auth/me/images/cover",
+        files={"image": ("cover.webp", b"RIFF0000WEBPfirst", "image/webp")},
+    )
+    first_url = first_upload.json()["cover_image_url"]
+    first_filename = first_url.rsplit("/", 1)[1]
+
+    client.post("/api/v1/auth/logout")
+    register(client, email="second@example.com", username="second_profile")
+    client.post(
+        "/api/v1/auth/login",
+        json={"email": "second@example.com", "password": "a-long-test-password"},
+    )
+    second_upload = client.post(
+        "/api/v1/auth/me/images/cover",
+        files={"image": ("cover.webp", b"RIFF0000WEBPsecond", "image/webp")},
+    )
+    assert second_upload.status_code == 200
+    first_database_user = client.app.state.test_session.get(User, first_id)
+    assert first_database_user.cover_image_path == first_filename
+    assert (tmp_path / first_filename).exists()
+    assert client.get(f"/api/v1/users/{first_id}").json()["cover_image_url"] == first_url
+
+    replacement = client.post(
+        "/api/v1/auth/me/images/cover",
+        files={"image": ("replacement.jpg", b"\xff\xd8\xffreplacement", "image/jpeg")},
+    )
+    assert replacement.status_code == 200
+    replacement_url = replacement.json()["cover_image_url"]
+    assert replacement_url != second_upload.json()["cover_image_url"]
+    assert client.get(second_upload.json()["cover_image_url"]).status_code == 404
+    assert client.get(replacement_url).content == b"\xff\xd8\xffreplacement"
+
+
+def test_media_retrieval_rejects_non_generated_filenames(client, tmp_path, monkeypatch):
+    from app.api.routes.posts import settings
+
+    monkeypatch.setattr(settings, "uploads_dir", tmp_path)
+    (tmp_path / "secret.txt").write_text("private")
+    assert client.get("/api/v1/media/secret.txt").status_code == 404
+    assert client.get("/api/v1/media/../secret.txt").status_code == 404
+
+
 def test_reactions_comments_and_view_sessions_are_persisted_and_deduplicated(client):
     user = register_verified_student(client)
     created = client.post(

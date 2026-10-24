@@ -47,6 +47,12 @@ export function AuthProvider({ children }) {
     return updatedUser;
   }, []);
 
+  const updateProfileImage = useCallback(async (imageType, file) => {
+    const updatedUser = await authService.updateProfileImage(imageType, file);
+    setUser(updatedUser);
+    return updatedUser;
+  }, []);
+
   const logout = useCallback(async () => {
     await authService.logout();
     setUser(null);
@@ -64,6 +70,7 @@ export function AuthProvider({ children }) {
         signup,
         socialLogin,
         updateProfile,
+        updateProfileImage,
         logout,
       }}
     >

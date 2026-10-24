@@ -1,10 +1,13 @@
 .auth-layout {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
   position: relative;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
 }
 
 .auth-layout__bg {
@@ -56,4 +59,21 @@
 .auth-layout__tagline {
   font-size: 13px;
   color: #bcbcbc;
+}
+
+@media (max-width: 480px) {
+  .auth-layout {
+    align-items: flex-start;
+    padding: max(16px, env(safe-area-inset-top)) 12px
+      max(16px, env(safe-area-inset-bottom));
+  }
+
+  .auth-layout__card {
+    padding: 22px 18px;
+    border-radius: 20px;
+  }
+
+  .auth-layout__logo {
+    margin-bottom: 20px;
+  }
 }

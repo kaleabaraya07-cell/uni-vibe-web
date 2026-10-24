@@ -23,7 +23,7 @@ export function mapApiPost(post) {
       id: post.author.id,
       name: post.author.display_name,
       username: `@${post.author.username}`,
-      avatar: "",
+      avatar: mediaUrl(post.author.avatar_url) || "",
       isStudent: post.author.is_student,
       verified: post.author.verification_status === "verified",
       university: post.author.university_id || "Uni Vibe Community",

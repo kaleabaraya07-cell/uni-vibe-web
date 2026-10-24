@@ -4,10 +4,18 @@
   box-sizing: border-box;
 }
 
+:root {
+  color-scheme: dark;
+  --page-gutter: clamp(10px, 2vw, 20px);
+  --mobile-content-gutter: clamp(10px, 3vw, 14px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 html,
 body,
 #root {
   height: 100%;
+  min-width: 320px;
 }
 
 body {
@@ -28,4 +36,38 @@ button {
 
 img {
   display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .app-layout__content,
+  .app-layout__main,
+  .app-layout__main > * {
+    min-width: 0;
+  }
+
+  .app-layout__main p,
+  .app-layout__main h1,
+  .app-layout__main h2,
+  .app-layout__main h3,
+  .app-layout__main h4 {
+    overflow-wrap: anywhere;
+  }
+
+  .app-layout__main img,
+  .app-layout__main video,
+  .app-layout__main iframe {
+    max-width: 100%;
+  }
 }

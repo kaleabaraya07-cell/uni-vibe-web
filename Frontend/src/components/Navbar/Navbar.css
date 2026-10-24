@@ -13,6 +13,7 @@
   color: white;
   box-sizing: border-box;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  flex: 0 0 auto;
 }
 
 .logo {
@@ -44,12 +45,12 @@
   letter-spacing: -0.3px;
 }
 
-.tabs {
+.navbar__tabs {
   display: flex;
   gap: 32px;
 }
 
-.tab {
+.navbar .tab {
   background: none;
   border: none;
   color: #bcbcbc;
@@ -63,13 +64,13 @@
   gap: 6px;
 }
 
-.tab.active {
+.navbar .tab.active {
   color: white;
   border-bottom: 2px solid #2d8cff;
   box-shadow: 0 4px 12px rgba(45, 140, 255, 0.2);
 }
 
-.tab--live .live-dot {
+.navbar .tab--live .live-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -83,10 +84,11 @@
   50% { opacity: 0.5; }
 }
 
-.right {
+.navbar__actions {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex: 0 0 auto;
 }
 
 .search-box {
@@ -133,4 +135,127 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(45, 140, 255, 0.3);
+}
+
+@media (max-width: 680px) {
+  .navbar {
+    height: auto;
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand actions"
+      "tabs tabs";
+    gap: 10px 12px;
+    padding: 10px 12px;
+    border-radius: 18px;
+  }
+
+  .navbar .logo {
+    grid-area: brand;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .navbar .logo-icon {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-radius: 11px;
+    font-size: 18px;
+  }
+
+  .navbar .logo h2 {
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .navbar__tabs {
+    grid-area: tabs;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    width: 100%;
+  }
+
+  .navbar .tab {
+    justify-content: center;
+    min-height: 38px;
+    padding: 6px 8px;
+    border-radius: 12px;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+
+  .navbar .tab.active {
+    background: rgba(45, 140, 255, 0.12);
+    border-bottom: 0;
+    box-shadow: none;
+  }
+
+  .navbar__actions {
+    grid-area: actions;
+    gap: 10px;
+  }
+
+  .navbar .search-box {
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .navbar .search-box span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .navbar__bell {
+    padding: 8px 0;
+  }
+
+  .navbar .profile {
+    width: 36px;
+    height: 36px;
+  }
+
+  .navbar__login {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .navbar {
+    gap: 8px 8px;
+    padding-inline: 10px;
+  }
+
+  .navbar .logo-icon {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+
+  .navbar .logo h2 {
+    font-size: 15px;
+  }
+
+  .navbar__actions {
+    gap: 8px;
+  }
+
+  .navbar .search-box {
+    width: 36px;
+    height: 36px;
+  }
+
+  .navbar .profile {
+    width: 32px;
+    height: 32px;
+  }
 }

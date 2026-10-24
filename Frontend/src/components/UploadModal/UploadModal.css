@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
 
 .upload-modal__error {
@@ -233,4 +234,35 @@
   gap: 10px;
   width: 100%;
   margin-top: 8px;
+}
+
+@media (max-width: 480px) {
+  .upload-modal {
+    gap: 12px;
+  }
+
+  .upload-modal__step {
+    letter-spacing: 0.12em;
+  }
+
+  .upload-modal__chip {
+    min-width: 0;
+    padding: 10px 8px;
+    gap: 5px;
+    font-size: 12px;
+  }
+
+  .upload-modal__options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .upload-modal__preview {
+    height: clamp(160px, 38dvh, 220px);
+  }
+}
+
+@media (max-width: 360px) {
+  .upload-modal__grid {
+    grid-template-columns: 1fr;
+  }
 }

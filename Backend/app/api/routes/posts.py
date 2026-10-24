@@ -119,6 +119,7 @@ def _post_read(row) -> PostRead:
             university_id=user.university_id,
             is_student=user.is_student,
             verification_status=user.verification_status,
+            avatar_url=user.avatar_url,
         ),
         likes=likes,
         saves=saves,
@@ -264,9 +265,12 @@ def get_liked_posts(
 
 @router.get("/media/{filename}")
 def get_media(filename: str):
-    if Path(filename).name != filename or filename.startswith("."):
+    if not re.fullmatch(r"[a-f0-9]{32}\.(?:jpg|png|webp|mp4|webm)", filename):
         raise HTTPException(status_code=404, detail="Media not found")
-    path = settings.uploads_dir / filename
+    root = settings.uploads_dir.resolve()
+    path = (root / filename).resolve()
+    if path.parent != root:
+        raise HTTPException(status_code=404, detail="Media not found")
     if not path.is_file():
         raise HTTPException(status_code=404, detail="Media not found")
     return FileResponse(path)

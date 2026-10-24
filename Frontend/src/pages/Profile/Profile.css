@@ -15,6 +15,52 @@
   position: relative;
   box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 14px;
+  box-sizing: border-box;
+}
+
+.profile-page__image-control {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.profile-page__image-button {
+  padding: 8px 12px;
+  border-radius: 9999px;
+  color: #fff;
+  background: rgba(2, 6, 23, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.profile-page__avatar-save {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: -14px;
+}
+
+.profile-page__image-message,
+.profile-page__image-error {
+  margin: -12px 0 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+.profile-page__image-message {
+  color: #2ed573;
+}
+
+.profile-page__image-error {
+  color: #ff7b7b;
 }
 
 /* League Card */
@@ -258,9 +304,136 @@
 
 @media (max-width: 768px) {
   .league-card-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .profile-vibes {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-page {
+    gap: 16px;
+    padding-bottom: 24px;
+  }
+
+  .profile-page__cover {
+    height: clamp(132px, 34vw, 190px);
+    border-radius: 18px;
+    padding: 10px;
+  }
+
+  .profile-page__image-control {
+    gap: 6px;
+  }
+
+  .profile-page__image-button {
+    padding: 8px 10px;
+  }
+
+  .profile-uni-bar {
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .profile-uni-info {
+    min-width: 0;
+  }
+
+  .profile-uni-info strong {
+    overflow-wrap: anywhere;
+  }
+
+  .profile-tabs {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    touch-action: pan-x;
+  }
+
+  .profile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .profile-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 12px;
+  }
+
+  .league-card-header {
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .league-stat-box {
+    min-width: 0;
+    padding: 10px;
+  }
+
+  .stat-value {
+    font-size: 16px;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 480px) {
+  .league-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-header {
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  .profile-header__name-row h1 {
+    font-size: clamp(20px, 6vw, 24px);
+  }
+
+  .profile-header__stats {
+    gap: 10px 16px;
+    flex-wrap: wrap;
+    font-size: 13px;
+  }
+
+  .profile-header__actions {
+    flex-wrap: wrap;
+  }
+
+  .profile-page__image-control > .ui-button {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .profile-page__avatar-save {
+    margin-top: -8px;
+    flex-wrap: wrap;
+  }
+
+  .profile-vibes {
+    gap: 8px;
+  }
+
+  .profile-vibes__label {
+    max-width: calc(100% - 16px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .profile-page__cover {
+    height: 128px;
+  }
+
+  .profile-uni-bar {
+    flex-direction: column;
+  }
+
+  .profile-header__avatar {
+    width: 92px;
+    height: 92px;
   }
 }

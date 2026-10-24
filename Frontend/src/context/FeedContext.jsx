@@ -185,15 +185,23 @@ export function FeedProvider({ children }) {
     }
   }, [user]);
 
-  const getSavedVibes = useCallback(
-    () => savedOwnerId === user?.id ? savedVibes : [],
-    [savedOwnerId, savedVibes, user?.id]
-  );
+  const getSavedVibes = () => savedOwnerId === user?.id
+    ? savedVibes.map((post) => (
+        post.user.id === user.id
+          ? { ...post, user: { ...post.user, avatar: user.avatar } }
+          : post
+      ))
+    : [];
+  const currentUserVibes = vibes.map((post) => (
+    post.user.id === user?.id
+      ? { ...post, user: { ...post.user, avatar: user.avatar } }
+      : post
+  ));
 
   return (
     <FeedContext.Provider
       value={{
-        vibes,
+        vibes: currentUserVibes,
         liked,
         reposted,
         loading,

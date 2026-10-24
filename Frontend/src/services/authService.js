@@ -1,4 +1,4 @@
-import apiClient, { ApiError } from "./apiClient";
+import apiClient, { ApiError, mediaUrl } from "./apiClient";
 
 export function mapApiUser(user) {
   return {
@@ -11,6 +11,8 @@ export function mapApiUser(user) {
     universityId: user.university_id,
     university: user.university_id || "",
     bio: user.bio || "",
+    avatar: mediaUrl(user.avatar_url) || "",
+    coverImage: mediaUrl(user.cover_image_url) || "",
   };
 }
 
@@ -65,6 +67,15 @@ export const authService = {
         bio,
         department: department || null,
       }),
+    }));
+  },
+
+  async updateProfileImage(imageType, file) {
+    const body = new FormData();
+    body.set("image", file);
+    return mapApiUser(await apiClient(`/auth/me/images/${imageType}`, {
+      method: "POST",
+      body,
     }));
   },
 

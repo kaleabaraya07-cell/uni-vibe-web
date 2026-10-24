@@ -19,10 +19,11 @@ function Navbar() {
         <h2>{t("app.name")}</h2>
       </Link>
 
-      <div className="tabs">
+      <nav className="navbar__tabs" aria-label="Main feed">
         <button
           type="button"
           className={`tab tab--live ${location.pathname === "/live" ? "active" : ""}`}
+          aria-current={location.pathname === "/live" ? "page" : undefined}
           onClick={() => navigate("/live")}
         >
           <span className="live-dot" />
@@ -31,14 +32,15 @@ function Navbar() {
         <button
           type="button"
           className={`tab ${location.pathname === "/feed" || location.pathname === "/" ? "active" : ""}`}
+          aria-current={location.pathname === "/feed" || location.pathname === "/" ? "page" : undefined}
           onClick={() => navigate("/feed")}
         >
           {t("nav.forYou")}
         </button>
-      </div>
+      </nav>
 
-      <div className="right">
-        <button type="button" className="search-box" onClick={() => navigate("/search")}>
+      <div className="navbar__actions">
+        <button type="button" className="search-box" aria-label={t("common.search")} onClick={() => navigate("/search")}>
           <Search size={18} />
           <span>{t("common.search")}</span>
         </button>
@@ -47,7 +49,7 @@ function Navbar() {
           {unreadCount > 0 && <span className="navbar__badge">{unreadCount}</span>}
         </Link>
         {user ? (
-          <Link to={`/profile/${user.id}`} aria-label="Your profile">
+          <Link className="navbar__profile-link" to={`/profile/${user.id}`} aria-label="Your profile">
             <img className="profile" src={user.avatar} alt={user.name} />
           </Link>
         ) : (

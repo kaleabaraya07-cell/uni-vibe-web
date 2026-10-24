@@ -1,9 +1,13 @@
 from datetime import datetime, timedelta, timezone
+import logging
+import re
+import secrets
 from threading import Lock
 
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
+from starlette.concurrency import run_in_threadpool
 
 from app.api.dependencies import CurrentUser, DbSession
 from app.core.config import get_settings
@@ -18,11 +22,21 @@ from app.schemas import LoginRequest, UserCreate, UserProfileUpdate, UserRead
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 settings = get_settings()
 _failure_lock = Lock()
 _login_failures: dict[str, tuple[int, float]] = {}
 _MAX_FAILURES = 5
 _FAILURE_WINDOW_SECONDS = 900
+PROFILE_IMAGE_TYPES = {
+    "image/jpeg": (".jpg", lambda content: content.startswith(b"\xff\xd8\xff")),
+    "image/png": (".png", lambda content: content.startswith(b"\x89PNG\r\n\x1a\n")),
+    "image/webp": (
+        ".webp",
+        lambda content: content.startswith(b"RIFF") and content[8:12] == b"WEBP",
+    ),
+}
+PROFILE_IMAGE_MAX_BYTES = 5 * 1024 * 1024
 
 
 def _identity_key(email: str, client_host: str) -> str:
@@ -154,4 +168,50 @@ def update_me(
     current_user.department = payload.department.strip() if payload.department else None
     db.commit()
     db.refresh(current_user)
+    return current_user
+
+
+@router.post("/me/images/{image_type}", response_model=UserRead)
+async def update_profile_image(
+    image_type: str,
+    current_user: CurrentUser,
+    db: DbSession,
+    image: UploadFile = File(...),
+) -> User:
+    if image_type not in {"avatar", "cover"}:
+        raise HTTPException(status_code=404, detail="Profile image type not found")
+
+    metadata = PROFILE_IMAGE_TYPES.get(image.content_type or "")
+    if metadata is None:
+        raise HTTPException(status_code=415, detail="Upload a JPEG, PNG, or WebP image")
+
+    extension, is_valid_image = metadata
+    content = await image.read(PROFILE_IMAGE_MAX_BYTES + 1)
+    if len(content) > PROFILE_IMAGE_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="Profile image must be 5 MB or smaller")
+    if not is_valid_image(content):
+        raise HTTPException(status_code=415, detail="Image content does not match its file type")
+
+    filename = f"{secrets.token_hex(16)}{extension}"
+    settings.uploads_dir.mkdir(parents=True, exist_ok=True)
+    saved_path = settings.uploads_dir / filename
+    try:
+        await run_in_threadpool(saved_path.write_bytes, content)
+        attribute = "avatar_path" if image_type == "avatar" else "cover_image_path"
+        previous_filename = getattr(current_user, attribute)
+        setattr(current_user, attribute, filename)
+        db.commit()
+        db.refresh(current_user)
+    except Exception:
+        db.rollback()
+        saved_path.unlink(missing_ok=True)
+        raise
+
+    if previous_filename and re.fullmatch(r"[a-f0-9]{32}\.(?:jpg|png|webp)", previous_filename):
+        previous_path = settings.uploads_dir / previous_filename
+        if previous_path != saved_path:
+            try:
+                previous_path.unlink(missing_ok=True)
+            except OSError:
+                logger.warning("Unable to remove replaced profile image", exc_info=True)
     return current_user

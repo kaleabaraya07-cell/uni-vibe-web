@@ -144,3 +144,11 @@
   color: #8c9ba5;
   text-decoration: underline;
 }
+
+@media (max-width: 380px) {
+  .login__options-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+}

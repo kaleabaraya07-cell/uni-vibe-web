@@ -6,6 +6,7 @@
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow: 0 24px 60px rgba(2,6,23,0.25);
   min-height: 520px;
+  min-width: 0;
 }
 
 .vibe-card__media {
@@ -14,6 +15,7 @@
   min-height: 520px;
   object-fit: cover;
   display: block;
+  max-width: 100%;
 }
 
 .vibe-card__actions {
@@ -109,6 +111,7 @@
   inset: auto 0 0 0;
   padding: 16px;
   background: linear-gradient(180deg, transparent, rgba(2,6,23,0.72));
+  min-width: 0;
 }
 
 .vibe-card__user {
@@ -379,10 +382,65 @@
 
 @media (max-width: 768px) {
   .vibe-card {
-    min-height: 440px;
+    min-height: min(440px, calc(100dvh - 250px));
+    border-radius: 20px;
   }
 
   .vibe-card__media {
-    min-height: 440px;
+    min-height: min(440px, calc(100dvh - 250px));
+  }
+
+  .vibe-card__actions {
+    right: 8px;
+    gap: 8px;
+  }
+
+  .vibe-card__action {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+  }
+
+  .vibe-card__overlay {
+    padding: 12px 56px 12px 12px;
+  }
+
+  .vibe-card__footer {
+    align-items: flex-start;
+  }
+
+  .vibe-card__music {
+    max-width: 100%;
+  }
+
+  .vibe-card__name,
+  .vibe-card__caption {
+    overflow-wrap: anywhere;
+  }
+
+  .vibe-card__sheet,
+  .vibe-card__menu {
+    right: 8px;
+    width: min(92vw, 320px);
+  }
+
+  .vibe-card__sheet {
+    bottom: 8px;
+    max-height: min(72dvh, 520px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .vibe-card__overlay {
+    padding-right: 50px;
+  }
+
+  .vibe-card__footer-actions {
+    gap: 4px;
+  }
+
+  .vibe-card__mini {
+    padding: 7px;
   }
 }

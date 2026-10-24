@@ -1,11 +1,19 @@
 import { useState } from "react";
-import { BadgeCheck, GraduationCap, Compass, Share2, Edit3, Check } from "lucide-react";
+import { BadgeCheck, GraduationCap, Compass, Share2, Edit3, Check, Camera } from "lucide-react";
 import { useLocale } from "../../context/LocaleContext";
 import { useAuth } from "../../context/useAuth";
 import Button from "../ui/Button/Button";
 import "./ProfileHeader.css";
 
-function ProfileHeader({ user, following, onFollow, onEditProfile }) {
+function ProfileHeader({
+  user,
+  following,
+  onFollow,
+  onEditProfile,
+  onEditAvatar,
+  avatarPreview,
+  imageUploadDisabled,
+}) {
   const { t } = useLocale();
   const { user: currentUser } = useAuth();
   const [copied, setCopied] = useState(false);
@@ -28,7 +36,25 @@ function ProfileHeader({ user, following, onFollow, onEditProfile }) {
   return (
     <div className="profile-header">
       <div className="profile-header__avatar-wrap">
-        <img src={user.avatar} alt={user.name} className="profile-header__avatar" />
+        <img src={avatarPreview || user.avatar} alt={user.name} className="profile-header__avatar" />
+        {isOwnProfile && onEditAvatar && (
+          <>
+            <input
+              id="profile-avatar-upload"
+              className="profile-header__file-input"
+              type="file"
+              disabled={imageUploadDisabled}
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => {
+                onEditAvatar(event.target.files?.[0] || null);
+                event.currentTarget.value = "";
+              }}
+            />
+            <label className="profile-header__avatar-edit" htmlFor="profile-avatar-upload" aria-label="Change profile picture">
+              <Camera size={15} />
+            </label>
+          </>
+        )}
         {user.isStudent ? (
           <span className="profile-header__badge-pill student" title="University student">
             <GraduationCap size={14} />

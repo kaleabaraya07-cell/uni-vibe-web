@@ -12,3 +12,135 @@
 .opportunity-card__deadline { color: #bcbcbc; font-size: 13px; margin-top: 8px; }
 .opportunity-card__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; align-items: center; }
 .opportunity-card__badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 999px; background: rgba(45,140,255,0.16); color: #7dd3fc; font-size: 13px; }
+
+.opportunities-page {
+  width: 100%;
+  min-width: 0;
+}
+
+.opportunities-hero,
+.opportunities-preview-section {
+  min-width: 0;
+}
+
+.opportunities-hero h1 {
+  max-width: 760px;
+  font-size: clamp(26px, 4vw, 42px);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.opportunities-hero__desc {
+  max-width: 720px;
+  line-height: 1.6;
+}
+
+.opportunities-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.opportunity-preview-card {
+  min-width: 0;
+}
+
+.cat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cat-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cat-tag {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.opportunities-partner-banner,
+.partner-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.opportunities-partner-banner {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.partner-content > div {
+  min-width: 0;
+}
+
+.waitlist-form__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.waitlist-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) auto;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.waitlist-input,
+.waitlist-select {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .opportunities-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .waitlist-inputs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .waitlist-btn {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .opportunities-page h1 {
+    font-size: clamp(24px, 7vw, 32px);
+    line-height: 1.15;
+  }
+
+  .opportunities-category-grid,
+  .waitlist-inputs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .waitlist-btn {
+    grid-column: auto;
+  }
+
+  .opportunities-partner-banner {
+    align-items: stretch;
+  }
+
+  .opportunities-partner-banner > .ui-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .opportunity-preview-card {
+    padding: 14px;
+  }
+}

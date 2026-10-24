@@ -48,9 +48,19 @@ class User(Base):
     )
     department: Mapped[str | None] = mapped_column(String(120), nullable=True)
     bio: Mapped[str] = mapped_column(String(500), default="", nullable=False)
+    avatar_path: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    cover_image_path: Mapped[str | None] = mapped_column(String(80), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
     university: Mapped["University | None"] = relationship(back_populates="users")
+
+    @property
+    def avatar_url(self) -> str | None:
+        return f"/api/v1/media/{self.avatar_path}" if self.avatar_path else None
+
+    @property
+    def cover_image_url(self) -> str | None:
+        return f"/api/v1/media/{self.cover_image_path}" if self.cover_image_path else None
 
 
 class AuthSession(Base):

@@ -266,3 +266,29 @@
   font-size: 13px;
   color: #8c9ba5;
 }
+
+@media (max-width: 480px) {
+  .signup-steps {
+    gap: 6px;
+  }
+
+  .signup-step-pill {
+    gap: 6px;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .signup-actions {
+    flex-wrap: wrap;
+  }
+
+  .signup-actions > * {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .signup-student-toggle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -190,11 +190,21 @@
 .league-nav-pills {
   display: flex;
   gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 12px;
 }
 
+.league-nav-pills::-webkit-scrollbar {
+  display: none;
+}
+
 .league-pill {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -692,7 +702,7 @@
 
 @media (max-width: 900px) {
   .league-highlights-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .your-uni-metrics-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -703,6 +713,10 @@
 }
 
 @media (max-width: 600px) {
+  .league-highlights-grid {
+    grid-template-columns: 1fr;
+  }
+
   .points-rules-grid {
     grid-template-columns: 1fr;
   }
