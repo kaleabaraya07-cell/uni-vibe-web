@@ -19,6 +19,7 @@ Inspect the target database and current migration revision before applying schem
 ```bash
 uv run alembic current
 uv run alembic history
+# Review the pending migration scripts and confirm DATABASE_URL points to the intended local database.
 uv run alembic upgrade head
 uv run python -m scripts.seed_development
 ```
@@ -32,6 +33,13 @@ uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 The API is available at `http://127.0.0.1:8000/api/v1`; interactive OpenAPI docs are at `http://127.0.0.1:8000/docs`. `/api/v1/ready` checks database connectivity. Migrations are explicit; application startup does not create or drop tables.
+
+After starting the API, verify readiness without creating or modifying records:
+
+```bash
+curl --fail http://127.0.0.1:8000/api/v1/health
+curl --fail http://127.0.0.1:8000/api/v1/ready
+```
 
 To create the first administrator interactively:
 
@@ -49,7 +57,11 @@ Unit/API tests use an isolated in-memory SQLite database; they do not use the co
 uv run pytest
 ```
 
-PostgreSQL migration and persistence checks must target a configured, verified database. Do not point destructive test setup at `uni_vibe_dev`.
+These tests do not verify PostgreSQL connectivity, migrations, or PostgreSQL persistence. PostgreSQL checks must use a separately provisioned test database, not `uni_vibe_dev`, and the test database must be confirmed before running any migration or write test.
+
+## View tracking contract
+
+Starting a view creates an authenticated view session. Completion must include `{"watched_seconds": 4}` or greater, representing accumulated playback reported by the video player; the server also checks that at least four seconds elapsed and rejects a reported playback duration greater than elapsed time. A request that only waits and omits playback telemetry is rejected. Browser-reported playback is not cryptographic proof against a modified client.
 
 ## Configuration
 

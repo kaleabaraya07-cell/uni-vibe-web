@@ -119,10 +119,13 @@ export const postService = {
     return apiClient(`/posts/${encodeURIComponent(postId)}/views/start`, { method: "POST" });
   },
 
-  completeView(postId, viewSessionId) {
+  completeView(postId, viewSessionId, watchedSeconds) {
     return apiClient(
       `/posts/${encodeURIComponent(postId)}/views/${encodeURIComponent(viewSessionId)}/complete`,
-      { method: "POST" }
+      {
+        method: "POST",
+        body: JSON.stringify({ watched_seconds: watchedSeconds }),
+      }
     );
   },
 };

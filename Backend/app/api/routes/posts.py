@@ -26,6 +26,7 @@ from app.schemas import (
     PostPage,
     PostRead,
     ReactionResult,
+    ViewCompleted,
     ViewStarted,
 )
 
@@ -399,6 +400,7 @@ def start_view(
 def complete_view(
     post_id: str,
     view_session_id: str,
+    payload: ViewCompleted,
     current_user: CurrentUser,
     db: DbSession,
 ) -> None:
@@ -421,6 +423,11 @@ def complete_view(
     elapsed = int((now - started_at).total_seconds())
     if elapsed < 4:
         raise HTTPException(status_code=422, detail="A valid view requires at least four seconds")
+    if payload.watched_seconds > elapsed + 1:
+        raise HTTPException(
+            status_code=422,
+            detail="Reported playback cannot exceed elapsed view time",
+        )
 
     view_session.completed_at = now
     already_counted = db.scalar(
@@ -434,7 +441,7 @@ def complete_view(
             PostView(
                 post_id=post_id,
                 user_id=current_user.id,
-                watched_seconds=elapsed,
+                watched_seconds=payload.watched_seconds,
             )
         )
     db.commit()

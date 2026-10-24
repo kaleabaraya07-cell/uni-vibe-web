@@ -158,10 +158,10 @@ export function FeedProvider({ children }) {
     setError("Recommendations are not available until the server workflow is implemented.");
   }, []);
 
-  const recordValidView = useCallback(async (id, viewSessionId) => {
-    if (!viewSessionId) return false;
+  const recordValidView = useCallback(async (id, viewSessionId, watchedSeconds) => {
+    if (!viewSessionId || watchedSeconds < 4) return false;
     try {
-      await postService.completeView(id, viewSessionId);
+      await postService.completeView(id, viewSessionId, watchedSeconds);
       setVibes((current) => current.map((post) => (
         post.id === id
           ? { ...post, views: post.views + 1, validViews: post.validViews + 1 }

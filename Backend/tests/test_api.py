@@ -245,7 +245,16 @@ def test_reactions_comments_and_view_sessions_are_persisted_and_deduplicated(cli
 
     start = client.post(f"/api/v1/posts/{post_id}/views/start")
     session_id = start.json()["view_session_id"]
-    early = client.post(f"/api/v1/posts/{post_id}/views/{session_id}/complete")
+    no_playback_report = client.post(
+        f"/api/v1/posts/{post_id}/views/{session_id}/complete"
+    )
+    assert no_playback_report.status_code == 422
+    assert client.app.state.test_session.get(ViewSession, session_id).completed_at is None
+
+    early = client.post(
+        f"/api/v1/posts/{post_id}/views/{session_id}/complete",
+        json={"watched_seconds": 4},
+    )
     assert early.status_code == 422
 
     view_session = client.app.state.test_session.get(
@@ -253,13 +262,25 @@ def test_reactions_comments_and_view_sessions_are_persisted_and_deduplicated(cli
     )
     view_session.started_at = datetime.now(timezone.utc) - timedelta(seconds=5)
     client.app.state.test_session.commit()
-    assert client.post(f"/api/v1/posts/{post_id}/views/{session_id}/complete").status_code == 204
+    waited_without_playback = client.post(
+        f"/api/v1/posts/{post_id}/views/{session_id}/complete"
+    )
+    assert waited_without_playback.status_code == 422
+    assert view_session.completed_at is None
+
+    assert client.post(
+        f"/api/v1/posts/{post_id}/views/{session_id}/complete",
+        json={"watched_seconds": 4},
+    ).status_code == 204
 
     second_session = client.post(f"/api/v1/posts/{post_id}/views/start").json()["view_session_id"]
     second = client.app.state.test_session.get(type(view_session), second_session)
     second.started_at = datetime.now(timezone.utc) - timedelta(seconds=6)
     client.app.state.test_session.commit()
-    assert client.post(f"/api/v1/posts/{post_id}/views/{second_session}/complete").status_code == 204
+    assert client.post(
+        f"/api/v1/posts/{post_id}/views/{second_session}/complete",
+        json={"watched_seconds": 5},
+    ).status_code == 204
 
     feed = client.get("/api/v1/feed").json()["data"][0]
     assert feed["likes"] == 0

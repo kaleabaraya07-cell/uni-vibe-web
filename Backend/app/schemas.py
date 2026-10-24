@@ -178,6 +178,10 @@ class ViewStarted(BaseModel):
     view_session_id: str
 
 
+class ViewCompleted(BaseModel):
+    watched_seconds: int = Field(ge=4, le=3600)
+
+
 class RankingEntry(BaseModel):
     university_id: str
     name: str

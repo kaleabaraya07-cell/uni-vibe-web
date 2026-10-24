@@ -129,7 +129,11 @@ function VibeCard({ vibe }) {
     }
     if (watchedSeconds >= 4) {
       viewCompletionPendingRef.current = true;
-      const completed = await recordValidView(vibe.id, viewSessionRef.current);
+      const completed = await recordValidView(
+        vibe.id,
+        viewSessionRef.current,
+        Math.floor(watchedSeconds)
+      );
       if (completed) viewSessionRef.current = null;
       viewCompletionPendingRef.current = false;
     }
