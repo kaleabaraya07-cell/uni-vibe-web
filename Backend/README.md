@@ -65,7 +65,7 @@ Starting a view creates an authenticated view session. Completion must include `
 
 ## Configuration
 
-Configuration is loaded from `Backend/.env` or process environment variables. See `.env.example` for the supported local settings. Media uploads are stored under the configured `UPLOADS_DIR` (default `Backend/uploads/`, ignored by Git).
+Configuration is loaded from `Backend/.env` or process environment variables. See `.env.example` for the supported local settings. Media uploads are stored under the configured `UPLOADS_DIR` (default `Backend/uploads/`, ignored by Git); relative paths are resolved from `Backend/` regardless of the process working directory.
 
 Profile pictures and banners are uploaded by an authenticated user with
 `POST /api/v1/auth/me/images/avatar` or `POST /api/v1/auth/me/images/cover`

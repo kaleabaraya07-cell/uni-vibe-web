@@ -138,23 +138,25 @@
 }
 
 @media (max-width: 680px) {
+  .navbar.navbar--non-home {
+    display: none;
+  }
+
   .navbar {
-    height: auto;
+    height: 64px;
     min-height: 64px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "brand actions"
-      "tabs tabs";
-    gap: 10px 12px;
-    padding: 10px 12px;
+    display: flex;
+    gap: 8px;
+    padding: 8px 10px;
     border-radius: 18px;
   }
 
   .navbar .logo {
-    grid-area: brand;
-    min-width: 0;
-    gap: 8px;
+    flex: 0 0 auto;
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    gap: 0;
   }
 
   .navbar .logo-icon {
@@ -166,25 +168,24 @@
   }
 
   .navbar .logo h2 {
-    font-size: 16px;
-    white-space: nowrap;
+    display: none;
   }
 
   .navbar__tabs {
-    grid-area: tabs;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-    width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: center;
+    gap: clamp(8px, 3vw, 16px);
   }
 
   .navbar .tab {
     justify-content: center;
-    min-height: 38px;
-    padding: 6px 8px;
+    min-height: 40px;
+    padding: 6px 4px;
     border-radius: 12px;
     font-size: 13px;
     letter-spacing: 0;
+    white-space: nowrap;
   }
 
   .navbar .tab.active {
@@ -194,68 +195,40 @@
   }
 
   .navbar__actions {
-    grid-area: actions;
-    gap: 10px;
+    flex: 0 0 auto;
+    gap: 0;
   }
 
   .navbar .search-box {
     width: 40px;
     height: 40px;
+    flex: 0 0 40px;
     justify-content: center;
     padding: 0;
     border-radius: 50%;
   }
 
   .navbar .search-box span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
+    display: none;
   }
 
-  .navbar__bell {
-    padding: 8px 0;
-  }
-
-  .navbar .profile {
-    width: 36px;
-    height: 36px;
-  }
-
+  .navbar__bell,
+  .navbar__profile-link,
   .navbar__login {
-    white-space: nowrap;
+    display: none;
   }
 }
 
 @media (max-width: 360px) {
-  .navbar {
-    gap: 8px 8px;
-    padding-inline: 10px;
-  }
-
   .navbar .logo-icon {
     width: 32px;
     height: 32px;
     flex-basis: 32px;
   }
 
-  .navbar .logo h2 {
-    font-size: 15px;
-  }
-
-  .navbar__actions {
-    gap: 8px;
-  }
-
   .navbar .search-box {
-    width: 36px;
-    height: 36px;
-  }
-
-  .navbar .profile {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
   }
 }

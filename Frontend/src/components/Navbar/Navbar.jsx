@@ -11,9 +11,10 @@ function Navbar() {
   const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
   return (
-    <header className="navbar">
+    <header className={`navbar${isHomePage ? "" : " navbar--non-home"}`}>
       <Link to="/" className="logo">
         <div className="logo-icon">U</div>
         <h2>{t("app.name")}</h2>

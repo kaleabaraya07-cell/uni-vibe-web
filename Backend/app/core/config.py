@@ -37,6 +37,14 @@ class Settings(BaseSettings):
             raise ValueError("Configured limits must be positive")
         return value
 
+    @field_validator("uploads_dir", mode="before")
+    @classmethod
+    def resolve_uploads_dir(cls, value: Path | str) -> Path:
+        path = Path(value)
+        if not path.is_absolute():
+            path = BACKEND_ROOT / path
+        return path.resolve()
+
     @model_validator(mode="after")
     def require_production_secret(self) -> "Settings":
         if self.app_env.lower() == "production":

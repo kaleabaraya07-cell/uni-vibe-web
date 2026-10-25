@@ -244,6 +244,81 @@ def test_authenticated_profile_image_upload_persists_and_is_retrievable(
     assert client.get("/api/v1/auth/me").json()["avatar_url"] == avatar_url
 
 
+def test_profile_image_survives_database_and_app_restart(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.api.routes.auth import settings
+    from app.db.base import Base
+    from app.db.session import get_db
+    from app.main import create_app
+    from app.models import University
+
+    database_path = tmp_path / "profile-test.sqlite3"
+    uploads_dir = tmp_path / "persistent-uploads"
+    monkeypatch.setattr(settings, "uploads_dir", uploads_dir)
+
+    def create_test_app():
+        engine = create_engine(
+            f"sqlite+pysqlite:///{database_path}",
+            connect_args={"check_same_thread": False},
+        )
+        session_factory = sessionmaker(bind=engine, expire_on_commit=False)
+        app = create_app()
+
+        def override_get_db():
+            with session_factory() as session:
+                yield session
+
+        app.dependency_overrides[get_db] = override_get_db
+        return app, engine
+
+    app, engine = create_test_app()
+    Base.metadata.create_all(engine)
+    with sessionmaker(bind=engine)() as session:
+        session.add(
+            University(
+                id="uni-test",
+                name="Example University",
+                short_name="EXU",
+                location="Test City",
+                description="Restart persistence test fixture",
+            )
+        )
+        session.commit()
+
+    with TestClient(app) as first_client:
+        registered = register(
+            first_client, email="restart@example.com", username="restart_profile"
+        )
+        user_id = registered.json()["id"]
+        assert first_client.post(
+            "/api/v1/auth/login",
+            json={"email": "restart@example.com", "password": "a-long-test-password"},
+        ).status_code == 200
+        uploaded = first_client.post(
+            "/api/v1/auth/me/images/avatar",
+            files={"image": ("avatar.png", b"\x89PNG\r\n\x1a\npersistent", "image/png")},
+        )
+        assert uploaded.status_code == 200
+        avatar_url = uploaded.json()["avatar_url"]
+        session_cookie = first_client.cookies.get("univibe_session")
+
+    engine.dispose()
+    restarted_app, restarted_engine = create_test_app()
+    try:
+        with TestClient(restarted_app) as restarted_client:
+            restarted_client.cookies.set("univibe_session", session_cookie)
+            assert restarted_client.get("/api/v1/auth/me").json()["avatar_url"] == avatar_url
+            assert restarted_client.get(f"/api/v1/users/{user_id}").json()["avatar_url"] == avatar_url
+            persisted_image = restarted_client.get(avatar_url)
+            assert persisted_image.status_code == 200
+            assert persisted_image.content == b"\x89PNG\r\n\x1a\npersistent"
+    finally:
+        restarted_engine.dispose()
+
+
 def test_profile_image_upload_requires_authentication(client, tmp_path, monkeypatch):
     from app.api.routes.auth import settings
 
