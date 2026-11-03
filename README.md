@@ -446,3 +446,4 @@ Uni Vibe — The Digital Home of University Life
 Founded and led by Kalab Araya.
 
 Built with a vision to connect students, celebrate campus life, and bring university communities together.
+[![Watch Demo Video](https://img.shields.io/badge/🎥_Watch_Demo_Video-Google_Drive-blue?style=for-the-badge)](https://drive.google.com/file/d/1UNYjAWmqqo5xFmQIPS41AzVhc_fl_i5Z/view?usp=drivesdk)
